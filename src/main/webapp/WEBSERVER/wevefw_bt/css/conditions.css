@@ -1,0 +1,70 @@
+/**
+	조회 조건 표시용 style
+	2020.07.06 이수재
+*/
+
+.local-sm-1, .local-sm-1-s, .local-sm-1-w, 
+.local-sm-2, .local-sm-3, .local-sm-4, .local-sm-5, .local-sm-6, .local-sm-7, 
+.local-sm-8, .local-sm-9, .local-sm-10, .local-sm-11, .local-sm-12 {
+	float: left;
+}
+
+.local-sm-12 { width: 100%; }
+
+.local-sm-11 { width: 91.66666667%; }
+
+.local-sm-10 { width: 83.33333333%; }
+
+.local-sm-9 { width: 75%; }
+
+.local-sm-8 { width: 66.66666667%; }
+
+.local-sm-7 { width: 58.33333333%; }
+
+.local-sm-6 { width: 50%; }
+
+.local-sm-5 { width: 41.66666667%; }
+
+.local-sm-4 { width: 33.33333333%; }
+
+.local-sm-3 { width: 25%; }
+
+.local-sm-3-w {	width: 35%; }
+
+.local-sm-2 { width: 16.66666667%; }
+
+.local-sm-2-s {	width: 6.66666667%; }
+
+.local-sm-1 { width: 8.33333333%; }
+
+.local-sm-1-s {	width: 4.33333333%; }
+
+.local-sm-1-w {	width: 12.33333333%; }
+
+.col-border-0 {
+	border-color: #e7eaec;
+    border-image: none;
+    border-style: none none none none;
+    border-width: 1px 1px;
+    padding-right: 10px;
+   }
+
+.col-border-1 {
+	border-color: #e7eaec;
+    border-image: none;
+    border-style: none none none solid;
+    border-width: 1px 1px;
+    padding-right: 10px;
+   }
+   
+ .col-border-2 {
+	border-color: #e7eaec;
+    border-image: none;
+    border-style: none none solid none;
+    border-width: 1px 1px;
+   }
+   
+ .col-border-3 {
+    border-style: solid solid solid solid;
+    border-width: 1px 1px 1px 1px;
+   }

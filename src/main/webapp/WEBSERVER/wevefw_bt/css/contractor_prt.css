@@ -1,0 +1,240 @@
+/*
+	[계약서 출력과 입력폼용]
+	작성일 : 2020.07.02
+	작성자 : 이수재
+*/
+
+@charset "UTF-8";
+body {
+font-family: MalgunGothic;
+font-size: 12px;
+}
+
+/* custom =============================================================================*/
+.wrap {
+    padding: 3px;
+    /* border: 1px solid black; */
+}
+
+a {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.emp { font-weight: bold; }
+.bigfont { font-size: 18px; }
+.center { text-align: center; }
+p {margin: 0}
+
+/* 계약서 헤더부분 ======================================================================*/
+.header {
+    margin-bottom: 12px;
+}
+.header .title {
+    color: #000;
+    background: url(./images/blt_title.png) left center no-repeat;
+    padding-left: 15px;
+    margin-bottom: 15px;
+}
+.header .subtitle { margin-bottom: 5px; }
+
+.header-contents { *zoom:1; /* IE5.5~7 브라우저 대응 Hack */ }
+.header-contents:after { content:""; display:block; clear:both; }
+
+.header-contents > div {
+    float: left;
+    height: 18px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border : 1px solid #a9c3d8;    
+    border-collapse: collapse;
+    color: black;
+}
+
+.contract-type-title {
+    width: 20%;
+    background-color : #ecf1f2;
+    font-weight: 600;
+    padding-left: 26px;
+}
+.inputsubmit {
+    width: 250px;
+    padding-left: 10px;
+}
+
+.contract-type {
+    width: 55%;
+    padding-left: 5px;
+}
+
+.contract-no {
+    width: 20%;
+    padding-left: 13px;
+}
+
+/* 계약서 부분 ========================================================================*/
+.contract {
+    padding: 30px 2px 10px 2px;
+    border: 1px solid #2c2c2c;
+    margin-bottom: 15px;
+    margin-right: 1px;
+    line-height: 1.3;
+}
+
+.contractor-eul {}
+.contract-header, .next-text, .contract-date {}
+
+.contract-header { margin-bottom: 20px; }
+.mainselect {
+    padding: 10px;
+    border: 1px solid #e1e1e1; 
+    padding-left: 15px;
+    margin: 10px;
+    background-color:floralwhite;
+}
+.mainselect .emp {margin-bottom: 10px;}
+.mainselect input[checked="checked"] + label {font-weight: bold;}
+.contract-header-text {
+    margin-bottom: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.next-text {margin-bottom: 20px;}
+.contract-body {
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 30px;
+}
+.contract-body ol {margin-top: 2px; margin-bottom: 2px;}
+.contract-body ul {list-style: none; margin-top: 2px; margin-bottom: 2px;}
+.item {margin-bottom: 15px;}
+.item .title {padding-bottom: 3px;}
+.item .value {padding-left: 10px;padding-bottom: 3px;}
+
+.pricepayment > div {float:left; margin-bottom: 5px;}
+.pricepayment .value {width: 10%;text-align: left;}
+.pricepayment .percent {width: 10%; text-align: right;padding-right: 30px;}
+.pricepayment .memo {width: 60%;}
+.pricepayment { *zoom:1; /* IE5.5~7 브라우저 대응 Hack */ }
+.pricepayment:after {content:""; display:block; clear:both;}
+
+.date-input {width: 12%; text-align: center;}
+.calendar {vertical-align: middle;}
+input.short {width: 35px; text-align: center;}
+.contract-body-botom {
+    padding-left: 10px;
+    margin-bottom: 20px;
+}
+.attach-file-text {
+    padding-left: 10px;
+    margin-bottom: 20px;
+}
+.contract-date { margin-bottom: 30px; margin-top: 30px;}
+.contractors {margin-top: 10px; margin-bottom: 10px;}
+.contractors p { margin: 0; }
+.contractor-info { margin-bottom: 17px; *zoom:1; /* IE5.5~7 브라우저 대응 Hack */ }
+.contractor-info:after {content:""; display:block; clear:both;}
+
+/*.contractor-info > div {float: left; width: 49%;} */
+.contractor-info .gap-eul {text-align: right; float:left; width: 40%;}
+.contractor-info .contractor {text-align: left; float: right; width: 55%;}
+.gap-eul-text {padding-right: 80px;}
+.contractor {}
+
+/* 첨부파일 부분 ======================================================================*/
+.contract-attach-files {}
+.contract-attach-files .option-layout { padding-top: 10px; }
+
+.attach-contents button {margin-left: 10px; }
+.attach-contents span {padding-left: 10px;}
+
+/* 꼬리말 부분 ======================================================================*/
+.contract-footer {
+    padding-bottom: 25px;
+    padding-right: 4px;
+}
+
+.create-text {
+    line-height: 130%;
+    font-size: 14px;
+}
+.logo {
+    background: url(/WEBSERVER/std/images/logo_tss_h40_60px.png) no-repeat right;
+    min-height: 70px;
+    margin-top: 20px;
+    margin-right: 10px;
+}
+
+/* Options 부분 ======================================================================*/
+.option-layout {
+    padding: 30px 5px 10px 5px;
+    border: 1px solid #2c2c2c;
+    margin-bottom: 15px;
+    margin-right: 1px;
+    line-height: 1.3;        
+}
+.option-header {margin-bottom: 5px;}
+.option-layout .buttons {text-align: right;}
+
+.option-title { margin-bottom: 15px; }
+.option-text { margin-bottom: 20px; }
+.option-text p {margin-bottom: 10px;}
+/*
+.option-text table {min-height: 200px;}
+.option-text table caption {text-align: right;}
+.option-text table.normal {min-height: inherit;width: 95%;border-collapse: collapse;}
+*/
+/* 계약조건  --------------------------------------------------------------------------*/
+.conditions dl {
+    padding-left: 3px;
+    padding-right: 3px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+.conditions ol {margin-top: 1px; margin-bottom: 1px;}
+/*
+.conditions table {width: 100%; border-collapse: collapse;margin: 10px 0;}
+.conditions table th, .conditions table td {
+    border: 1px solid #a9c3d8;
+    padding: 5px;
+}
+.conditions table th {
+    background-color: #ecf1f2;
+    line-height: 2;
+}
+.conditions table td {
+    text-align: center;
+    vertical-align: middle;
+}
+.conditions table td:last-child {
+    text-align: left;
+}
+*/
+
+/* 확약서    --------------------------------------------------------------------------*/
+/* .commitment .contractor-info > div {float:right;} */
+.this-work {text-decoration: underline;}
+.self-text {font-weight: normal;}
+
+/* 안전각서   ------------------------------------------------------------------------*/
+/* .safety-memorandum .contractor-info > div {float:right;} */
+.safety-memorandum ol {padding-left: 22px;}
+
+/* 상품거래계약서(FW) -----------------------------------------------------------------*/
+.supplyfw table.normal {}
+.supplyfw table.normal th, .supplyfw table.normal td {
+    border: 1px solid #2c2c2c;text-align: center;padding: 5px;}
+.supplyfw ul {list-style: none;}
+.supplyfw ul li {margin-top: 5px; }
+
+/* pdf 출력 보정용 -------------------------------------------------------------------*/
+#pdf-form { }
+#pdf-form .contractor {width: 330px;}
+#pdf-form .pricepayment .value {width: 80px;}
+#pdf-form .pricepayment .percent {width: 80px;}
+#pdf-form .pricepayment .memo {width: 400px;}
+
+table {border-collapse: collapse; border: 1px solid black;width: 100%;}
+table th, table td {font-size: 12px; border: 1px solid black;padding: 3px;line-height: 1.0; }
+table th {font-weight: bold;}
+table th p, table td p {margin: 0;padding: 0;}
