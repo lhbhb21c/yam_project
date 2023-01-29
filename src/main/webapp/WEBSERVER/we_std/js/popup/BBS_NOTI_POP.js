@@ -1,0 +1,149 @@
+/**
+ * 파일명	: BBS_NOTI_POP.js
+ * 설명	: 게시판 공지내용
+ * 
+ * 수정일		 	수정자		수정내용
+ * 2021.12.08	염국선		최초작성
+ */
+//angular module instance
+const app = NG_UTL.instanceBasicModule("mstApp", []);
+NG_ATCH.addAttachListDirective(app);
+//controller 설정
+app.controller("mstCtl", ($scope, $timeout, $filter, $window, uiGridConstants, blockUI) => {
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	// DATA 선언 및 초기화
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	//configuration data set
+	$scope.ds_conf	= {};
+	//code data set
+	$scope.ds_code	= {};
+	//조회조건 data set
+	$scope.ds_cond	= {};
+	//마스터 data set
+	$scope.ds_mst	= {};
+	//첨부파일
+	$scope.ds_at	= 
+		{
+			config	: {
+				editable: false
+			}
+		};
+	
+
+	//초기화
+	$scope.load = (conf) => {
+		$scope.ds_conf = conf||{};
+		const paramSet = XUTL.getRequestParamSet();
+		$scope.ds_conf.POPUP_ID = paramSet.ID;
+		$scope.ds_conf.POPUP_OPTIONS = JSON.parse(decodeURIComponent(paramSet.OPTIONS));
+		
+		//데이터 초기화
+		$scope.lfn_dataset_init();
+		//기본데이터 로드
+		$scope.lfn_load_base();
+	    //조회
+		$timeout(() => {
+		    $scope.lfn_search();
+		});
+	}//end-load
+
+    //데이터 초기화
+    $scope.lfn_dataset_init = (name) => {
+    	if (!name || name === "ds_cond") {
+        	XUTL.empty($scope.ds_cond);
+        	$scope.ds_cond.NOTI_ID	= $scope.ds_conf.POPUP_OPTIONS.NOTI_ID;
+    	}
+    	if (!name || name === "MST") {
+        	XUTL.empty($scope.ds_mst);
+        	XUTL.empty($scope.ds_at.data);
+    	}
+    }//end-lfn_dataset_init
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+	// //DATA 선언 및 초기화
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	// UI interface
+	///////////////////////////////////////////////////////////////////////////////////////////////
+    //버튼 관련 ng-disabled 처리
+    $scope.lfn_btn_disabled = (name) => {
+    	return false;
+    }//end-lfn_btn_disabled
+
+    //버튼클릭이벤트
+    $scope.lfn_btn_onClick = (name) => {
+    	if (name === "CLOSE") {
+    		$window.close();
+    	}
+    }//end-lfn_btn_onClick
+
+    //입력관련 ng-disabled 처리
+    $scope.lfn_input_disabled = (name) => {
+    	return false;
+    }//end-lfn_input_disabled
+    
+    //입력필드 change
+    $scope.lfn_input_onChange = (name) => {
+    }//end-lfn_input_onChange
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	// //UI interface
+	///////////////////////////////////////////////////////////////////////////////////////////////
+
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+	// CRUD
+	///////////////////////////////////////////////////////////////////////////////////////////////
+    //기본정보 조회
+    $scope.lfn_load_base = () => {
+    }//end-lfn_load_base
+    
+    //조회
+    $scope.lfn_search = () => {
+    	$scope.lfn_dataset_init("MST");
+    	
+		const param = {queryId: "we.std.popup.BBS_NOTI_POP.selMstInfo",	queryType:"selOne",	param:$scope.ds_cond};
+
+		blockUI.start();
+		XUTL.fetch({
+			url	: "/std/cmmn/query.do",
+			data: param 
+		}).then((response) => {
+			if (response.success) {
+				$scope.ds_mst = response.success;
+				$scope.ds_at.config.FILE_BINDER_ID = $scope.ds_mst.NOTI_AT;
+				if ($scope.ds_mst.NOTI_AT) {
+					$scope.ds_at.api.load();
+				}
+				
+			} else {
+				alert("게시정보를 확인 할 수 없습니다.");
+			}
+
+		}).finally((data) => {
+			$timeout(() => {
+				blockUI.stop();
+			});
+		});
+    }//end-lfn_search
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	// //CRUD
+	///////////////////////////////////////////////////////////////////////////////////////////////
+
+    
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	// Grid 관련   
+	///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+	// //Grid 관련   
+	///////////////////////////////////////////////////////////////////////////////////////////////	
+	
+    
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	// Utility
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	// //Utility
+	///////////////////////////////////////////////////////////////////////////////////////////////
+
+});//end-app.controller("mstCtl", ($scope, $timeout, $filter, $window, uiGridConstants, blockUI) => {
