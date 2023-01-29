@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: WHOUT_LIST.xml
+	설명	: 출고 조회
+	수정일		 	수정자		수정내용
+	2021.10.22 	염국선		최초작성
+-->
+<mapper namespace="yam.wm.WHOUT_LIST">
+
+	<!-- 출고상세 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.WHOUT_ID,		#출고ID
+			M.SECTR_ID,		#섹터ID
+			M.WHOUT_NO,		#출고번호
+			M.WHOUT_DY,		#출고일자
+			M.WHOUT_GB,		#출고구분
+			M.OD_NO,
+			F_CD_NM(M.SECTR_ID, 'WHOUT_GB', M.WHOUT_GB)		AS WHOUT_GB_NM,	#출고구분명
+			M.WH_CD,		#창고코드
+			F_CD_NM(M.SECTR_ID, 'WH_CD', M.WH_CD)			AS WH_CD_NM,	#창고코드명
+			M.WHOUT_ST,		#출고상태
+			F_CD_NM(M.SECTR_ID, 'WHOUT_ST', M.WHOUT_ST)		AS WHOUT_ST_NM,	#출고상태명
+			M.PARTNR_ID,	#거래처ID
+			pat.PARTNR_NM,	#거래처명
+			S.WHOUT_SN,		#출고순번
+			S.ITM_ID,		#품목ID
+			itm.ITM_CD,		#품목번호
+			itm.ITM_NM,		#품목명
+			itm.ITM_GB,		#품목구분
+			F_CD_NM(itm.SECTR_ID, 'ITM_GB', itm.ITM_GB)	AS ITM_GB_NM,	#품목구분명
+			S.WHOUT_UN,		#출고단위
+			S.WHOUT_QTY,	#출고수량
+			S.WHOUT_PRC,	#출고단가
+			S.WHOUT_SPL_AM,	#출고공급금액
+			S.WHOUT_VAT,	#출고부가세
+			S.WHOUT_SUM_AM,	#출고합계금액
+			S.OD_ID,		#지시서ID
+			S.OD_SN,		#지시서순번
+			S.REG_ID,		#등록자ID
+			S.REG_DT		#등록일시
+		
+		FROM T_WHOUT_H M
+			INNER JOIN T_WHOUT_L S
+				ON		S.WHOUT_ID		= M.WHOUT_ID
+			LEFT OUTER JOIN V_ITM itm
+				ON		itm.ITM_ID		= S.ITM_ID
+			LEFT OUTER JOIN WZ_PARTNR_H pat
+				ON		pat.PARTNR_ID	= M.PARTNR_ID
+
+		WHERE	M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+			AND M.WHOUT_DY		BETWEEN	#{DY_FR} AND #{DY_TO}
+		
+		<if test="WHOUT_GBS != null and WHOUT_GBS.size() != 0">
+			AND M.WHOUT_GB		IN
+			<foreach collection="WHOUT_GBS" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="WHOUT_GBS == null or WHOUT_GBS.size() == 0">
+			AND 1=0
+		</if>
+
+		<if test="ITM_GBS != null and ITM_GBS.size() != 0">
+			AND  itm.ITM_GB		IN
+			<foreach collection="ITM_GBS" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="ITM_GBS == null or ITM_GBS.size() == 0">
+			AND 1=0
+		</if>
+		
+		<if test="WH_CDS != null and WH_CDS.size() != 0">
+			AND M.WH_CD			IN
+			<foreach collection="WH_CDS" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="WH_CDS == null or WH_CDS.size() == 0">
+			AND 1=0
+		</if>
+		
+		ORDER BY
+			M.WHOUT_DY DESC, 
+			S.WHOUT_ID,
+			S.WHOUT_SN
+
+	</select>
+	
+	
+	<!-- 출고 항목 내역 조회 -->
+	<select id="selSubList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.WHOUT_ID,		#출고ID
+			M.WHOUT_NO,		#출고번호
+			M.WHOUT_DY,		#출고일자
+			M.WHOUT_GB,		#출고구분
+			F_CD_NM(M.SECTR_ID, 'WHOUT_GB', M.WHOUT_GB)	AS WHOUT_GB_NM,	#출고구분명
+			M.WH_CD,		#창고코드
+			F_CD_NM(M.SECTR_ID, 'WH_CD', M.WH_CD)		AS WH_CD_NM,	#창고코드명
+			M.WHOUT_ST,		#출고상태
+			F_CD_NM(M.SECTR_ID, 'WHOUT_ST', M.WHOUT_ST)	AS WHOUT_ST_NM,	#출고상태명
+			M.PARTNR_ID,	#거래처ID
+			S.WHOUT_SN,		#출고순번
+			S.ITM_ID,		#품목ID
+			itm.ITM_CD,		#품목번호
+			itm.ITM_NM,		#품목명
+			itm.ITM_GB,		#품목구분
+			F_CD_NM(itm.SECTR_ID, 'ITM_GB', itm.ITM_GB)	AS ITM_GB_NM,	#품목구분명
+			S.WHOUT_UN,		#출고단위
+			S.WHOUT_QTY,	#출고수량
+			S.WHOUT_PRC,	#출고단가
+			S.WHOUT_SPL_AM,	#출고공급금액
+			S.WHOUT_VAT,	#출고부가세
+			S.WHOUT_SUM_AM,	#출고합계금액
+			S.OD_ID,		#지시서ID
+			S.OD_SN,		#지시서순번
+			S.REG_ID,		#등록자ID
+			S.REG_DT		#등록일시
+		
+		FROM T_WHOUT_H M
+			INNER JOIN T_WHOUT_L S
+				ON		S.WHOUT_ID		= M.WHOUT_ID
+			LEFT OUTER JOIN V_ITM itm
+				ON		itm.ITM_ID		= S.ITM_ID
+
+		WHERE	M.WHOUT_ID	= #{WHOUT_ID}
+
+		ORDER BY
+			S.WHOUT_SN
+
+	</select>
+
+</mapper>

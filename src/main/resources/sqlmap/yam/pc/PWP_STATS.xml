@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: PWP_STATS.xml
+	설명	: 생산실적현황
+	수정일		 	수정자		수정내용
+	2021.10.29 	XXX		최초작성
+-->
+<mapper namespace="yam.pc.PWP_STATS">
+
+	<!-- 생산실적현황 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			T.SECTR_ID,		#회사코드
+		    T.PWP_ID,
+		    T.PWO_ID,
+			CASE
+				WHEN T.PWP_SN = 0 THEN T.PWP_NO
+				ELSE NULL
+			END	AS PWP_NO,		#작업실적번호
+			CASE
+				WHEN T.PWP_SN = 0 THEN NULL
+				ELSE T.PWP_SN
+			END	AS PWP_SN,		#작업실적순번
+			CASE
+				WHEN T.PWP_SN = 0 THEN pwoh.PWO_NO
+				ELSE NULL
+			END	AS PWO_NO,		#작업지시번호
+			CASE
+				WHEN T.PWP_SN = 0 THEN T.PWP_DY
+				ELSE NULL
+			END	AS PWP_DY,		#작업실적일자
+			T.ITM_CD,			#품목코드
+			T.ITM_UN,			#품목단위
+			F_CD_NM(T.SECTR_ID, 'QTY_UN', T.ITM_UN)	AS ITM_UN_NM,	#품목단위명
+			itm.ITM_NM,			#품목명
+			T.PWP_QTY,			#작업실적수량
+			T.PWO_QTY,			#작업지시수량
+			T.PWO_GB,			#작업지시구분
+			CASE
+				WHEN T.PWP_SN = 0 THEN F_CD_NM(T.SECTR_ID, 'PWO_GB', T.PWO_GB)
+				ELSE NULL
+			END	AS PWO_GB_NM	#작업지시구분명
+
+		FROM
+			(
+				SELECT
+					M.SECTR_ID,				#회사코드
+					M.PWP_ID,					#작업실적번호
+					M.PWP_NO,					#작업실적번호
+					0				AS PWP_SN,	#작업실적순번
+					M.PWO_ID,					#작업지시번호
+					0				AS PWO_SN,	#작업지시순번
+					M.PWP_DY,					#작업실적일자
+					M.PWP_ITM_ID,				#생산품목코드
+					M.PWP_ITM_ID	AS ITM_ID,	#작업실적투입품목ID
+					itm.ITM_CD		AS ITM_CD,	#작업실적투입품목코드
+					M.PWP_ITM_UN	AS ITM_UN,	#작업실적투입품목단위
+					M.PWP_QTY,					#작업실적수량
+					pwoh.PWO_QTY,				#작업지시수량
+					pwoh.PWO_GB					#작업지시구분
+
+				FROM T_PWP_H M
+
+				    INNER JOIN T_PWO_H pwoh
+						ON		pwoh.SECTR_ID	= M.SECTR_ID
+							AND pwoh.PWO_ID		= M.PWO_ID
+
+					INNER JOIN V_ITM itm
+						on		itm.SECTR_ID	= M.SECTR_ID
+						    AND M.PWP_ITM_ID 	= itm.ITM_ID
+
+		<if test="PWO_GBS != null and PWO_GBS.size() != 0">
+							AND pwoh.PWO_GB		IN
+			<foreach collection="PWO_GBS" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="PWO_GBS == null or PWO_GBS.size() == 0">
+			AND 1=0
+		</if>
+
+				WHERE	M.SECTR_ID		= #{SS_USER_INFO.SECTR_ID}
+					AND M.PWP_DY		BETWEEN	#{DY_FR} AND #{DY_TO}
+					AND M.PWP_ST		= '30'	# 30: 확정
+					AND M.USE_YN		= 'Y'
+
+				UNION ALL
+
+
+				SELECT
+					M.SECTR_ID,					#회사코드
+					M.PWP_ID,						#작업실적번호
+					M.PWP_NO,						#작업실적번호
+					S.PWP_SN,						#작업실적순번
+					S.PWO_ID,						#작업지시번호
+					S.PWO_SN,						#작업지시순번
+					M.PWP_DY,						#작업실적일자
+					M.PWP_ITM_ID,					#생산품목코드
+					S.PWP_IN_ITM_ID		AS ITM_ID,	#작업실적투입품목코드
+					itm.ITM_CD			AS ITM_CD,	#작업실적투입품목코드
+					S.PWP_IN_ITM_UN		AS ITM_UN,	#작업실적투입품목단위
+					S.PWP_IN_QTY		AS PWP_QTY,	#작업실적수량
+					pwol.PWO_IN_QTY		AS PWO_QTY,	#작업지시수량
+					pwoh.PWO_GB						#작업지시구분
+
+				FROM T_PWP_H M
+					INNER JOIN T_PWP_L S
+						ON		S.PWP_ID		= M.PWP_ID
+
+					INNER JOIN T_PWO_H pwoh
+						ON		pwoh.SECTR_ID	= M.SECTR_ID
+							AND pwoh.PWO_ID		= M.PWO_ID
+
+					INNER JOIN V_ITM itm
+						on		itm.SECTR_ID	= M.SECTR_ID
+							AND S.PWP_IN_ITM_ID = itm.ITM_ID
+
+		<if test="PWO_GBS != null">
+							AND pwoh.PWO_GB		IN
+			<foreach collection="PWO_GBS" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+
+					LEFT OUTER JOIN T_PWO_L pwol
+						ON		pwol.PWO_ID		= S.PWO_ID
+							AND pwol.PWO_SN		= S.PWO_SN
+
+				WHERE	M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+					AND M.PWP_DY		BETWEEN	#{DY_FR} AND #{DY_TO}
+					AND M.PWP_ST		= '30'	# 30: 확정
+					AND M.USE_YN		= 'Y'
+		) T
+			INNER JOIN T_PWO_H pwoh
+			    ON 		pwoh.SECTR_ID	= T.SECTR_ID
+			    	AND pwoh.PWO_ID		= T.PWO_ID
+			LEFT OUTER JOIN V_ITM itm
+				ON		itm.SECTR_ID	= T.SECTR_ID
+					AND itm.ITM_ID		= T.ITM_ID
+		
+		<if test="ITM_CD != null and ITM_CD != '' ">
+			LEFT OUTER JOIN V_ITM pitm
+				ON		pitm.SECTR_ID	= T.SECTR_ID
+					AND pitm.ITM_ID		= T.PWP_ITM_ID
+					
+		WHERE	(pitm.ITM_CD LIKE CONCAT('%', #{ITM_CD}, '%') OR pitm.ITM_NM LIKE CONCAT('%', #{ITM_CD}, '%'))
+		</if>
+
+		ORDER BY
+			T.PWP_DY,
+			T.PWP_NO,
+			T.PWP_SN
+	</select>	
+	
+
+</mapper>

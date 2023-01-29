@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: USER_ENV_MNG.xml
+	설명	: 사용자설정
+	수정일		 	수정자		수정내용
+	2021.11.05	이경수		최초작성
+-->
+<mapper namespace="yam.bs.USER_ENV_MNG">
+
+	<!-- 사용자 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT	VU.COMPANY_CD,
+				VU.USER_ID,
+				VU.USER_NM,
+				VU.USER_PWD,
+				VU.USER_TYPE,
+				VU.USER_GUBUN,
+				F_CD_NM(VU.COMPANY_CD, 'USER_GUBUN', VU.USER_GUBUN) AS USER_GUBUN_NM,
+				VU.MES_YN,
+				VU.USE_YN,
+				VU.REG_ID,
+				DATE_FORMAT(VU.REG_DTTM, '%Y-%m-%d') AS REG_DTTM,
+				VU.UPD_ID,
+				VU.UPD_DTTM,
+				'R' AS ROW_CRUD
+				
+		FROM	V_USER VU
+		
+		WHERE	VU.COMPANY_CD	= #{SS_USER_INFO.COMPANY_CD, jdbcType=VARCHAR}
+		<if test="USER_NM != null and USER_NM != ''">
+			AND VU.USER_NM LIKE CONCAT('%', #{USER_NM}, '%')
+		</if>
+		<if test="USER_TYPE != null and USER_TYPE != ''">
+			AND VU.USER_TYPE 	= #{USER_TYPE}
+		</if>
+		<if test="USER_GUBUN != null and USER_GUBUN != ''">
+			AND VU.USER_GUBUN 	= #{USER_GUBUN}
+		</if>
+		<if test="USE_YN != null and USE_YN != ''">
+			AND VU.USE_YN 		= #{USE_YN}
+		</if>
+		
+		ORDER BY
+				VU.USER_ID
+				
+	</select>
+
+	<!-- 사용자설정 관련 처리 -->
+ 	<select id="save" statementType="CALLABLE" parameterType="java.util.Map">
+ 		{ 
+ 			CALL PROC_USER_ENV_MNG (
+ 				#{CMD, jdbcType=VARCHAR},
+ 				#{XML_TEXT, jdbcType=VARCHAR},
+ 				#{SS_USER_INFO.USER_ID, jdbcType=VARCHAR},
+ 				#{RS_MESSAGE, mode=OUT, jdbcType=VARCHAR},
+ 				#{ER_MESSAGE, mode=OUT, jdbcType=VARCHAR}
+ 			) 
+ 		}
+ 	</select>
+	
+</mapper>

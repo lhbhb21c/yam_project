@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: Login.xml
+	설명	: login
+	수정일		 	수정자		수정내용
+	2021.11.05	이경수		최초작성
+-->
+<mapper namespace="yam.cmmn.login.Login">
+
+    <!-- 시용자정보 -->
+    <select id="selLoginUserInfo" parameterType="java.util.Map" resultType="java.util.HashMap">
+    	SELECT
+    		M.MEM_ID,
+    		M.SECTR_ID,
+    		sec.SECTR_NM,
+    		sec.CO_CD,
+    		co.CO_NM,
+    		sec.CO_CD			AS COMPANY_CD,
+    		co.CO_NM			AS COMPANY_NM,
+    		M.USER_ID,
+    		M.USER_NM,
+    		M.MEM_TY,
+    		M.MEM_GB,
+    		M.MEM_ROLE_CDS,
+    		(
+    			SELECT
+    				GROUP_CONCAT(cdh.CD_NM SEPARATOR ',')
+    			FROM WZ_CD_H cdh
+    			WHERE	cdh.PARENT_CD_ID					= (SELECT CD_ID FROM WZ_CD_H WHERE CD_LVL = 1 AND CD_KEY = 'MEM_ROLE_CD')
+    				AND INSTR(M.MEM_ROLE_CDS, cdh.CD_KEY)	> 0
+			)					AS MEM_ROLE_NM,
+    		M.MEM_REF1
+			
+		FROM	WZ_MEM_H M
+			INNER JOIN WZ_CO_SECTR sec
+				ON	sec.SECTR_ID = M.SECTR_ID
+			INNER JOIN WZ_CO_H	co
+				ON	co.CO_CD = sec.CO_CD
+			
+		WHERE	M.USER_ID		= #{USER_ID}
+			AND M.USER_PWD		= #{USER_PWD}
+			AND M.USE_YN		= 'Y'
+			AND M.DEL_YN		= 'N'
+
+		<if test="SECTR_ID != null and SECTR_ID != '' ">
+			AND M.SECTR_ID		= #{SECTR_ID}
+		</if>
+
+    </select> 
+	
+</mapper>

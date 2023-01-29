@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: Dashboard.xml
+	설명	: 대시보드
+	수정일		 	수정자		수정내용
+	2021.11.05	이경수		최초작성
+-->
+<mapper namespace="yam.cmmn.main.Dashboard">
+
+    <!-- 생산현황 -->
+    <select id="selPwpList" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT
+			M.SECTR_ID,		#회사코드
+			M.PWP_NO,			#작업실적번호
+			M.PWO_ID,			#작업지시ID
+			M.PWP_DY,			#작업실적일자
+			M.PWP_HM,			#작업실적시분
+			M.PWP_CP_ID,		#작업실적담당자ID
+			M.PWP_WHOUT_WH_CD,	#작업실적출고창고코드
+			F_CD_NM(M.SECTR_ID, 'WH_CD', M.PWP_WHOUT_WH_CD)	AS PWP_WHOUT_WH_CD_NM,	#작업실적출고창고코드명
+			M.PWP_WHIN_WH_CD,	#작업실적입고창고코드
+			F_CD_NM(M.SECTR_ID, 'WH_CD', M.PWP_WHIN_WH_CD)	AS PWP_WHIN_WH_CD_NM,	#작업실적입고창고코드명
+			M.PWP_ITM_ID,		#작업실적품목코드
+			M.PWP_ITM_UN,		#작업실적품목단위
+			F_CD_NM(M.SECTR_ID, 'QTY_UN', M.PWP_ITM_UN)		AS PWP_ITM_UN_NM,		#작업실적품목단위명
+		    itm.ITM_CD,
+			itm.ITM_NM											AS PWP_ITM_NM,			#작업실적품목명
+			itm.ITM_GB											AS PWP_ITM_GB,			#작업실적품목구분
+			F_CD_NM(itm.SECTR_ID, 'ITM_GB', itm.ITM_GB)		AS PWP_ITM_GB_NM,		#작업실적품목구분명
+			M.PWP_QTY,			#작업실적수량
+			M.PWP_MEMO,			#작업실적메모
+			M.PWP_ST,			#작업실적상태
+			F_CD_NM(M.SECTR_ID, 'PWP_ST', M.PWP_ST)			AS PWP_ST_NM,		#작업실적상태명
+			S.PWO_DY,			#작업지시일자
+			S.PWO_GB,			#작업지시구분
+			F_CD_NM(S.SECTR_ID, 'PWO_GB', S.PWO_GB)			AS PWO_GB_NM,		#작업지시구분명
+			S.PROD_TM,			#생산차수
+			S.OD_ID,			#주문집계ID
+			S.PWO_QTY,			#작업지시수량
+			S.PWO_MEMO,			#작업지시메모
+			S.PWO_ST,			#작업지시상태
+			F_CD_NM(S.SECTR_ID, 'PWO_ST', S.PWO_ST)			AS PWO_ST_NM		#작업지시상태명
+
+		FROM T_PWP_H M
+			INNER JOIN T_PWO_H S
+				ON		S.SECTR_ID		= M.SECTR_ID
+					AND S.PWO_ID		= M.PWO_ID
+
+			LEFT OUTER JOIN V_ITM itm
+				ON		itm.SECTR_ID	= M.SECTR_ID
+					AND itm.ITM_ID		= M.PWP_ITM_ID
+
+		WHERE	M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+			AND M.PWP_DY		= DATE_FORMAT(NOW(), '%Y-%m-%d')
+
+		ORDER BY
+			M.PWP_DY, 
+			M.PWP_HM, 
+			M.PWP_NO
+    </select> 
+
+    <!-- 주문집계현황 -->
+    <select id="selTrList" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT
+			M.SECTR_ID,	#회사코드
+			M.TR_AGGR_DY,	#주문집계일자
+			M.TR_AGGR_TM,	#주문집계차수
+			F_CD_NM(M.SECTR_ID, 'TR_AGGR_TM', M.TR_AGGR_TM)	AS TR_AGGR_TM_NM,	#주문집계차수명
+			M.TR_AGGR_SN,	#주문집계순번
+		    M.ITM_ID,
+			itm.ITM_CD,		#품목코드
+			itm.ITM_NM,		#품목명
+			M.ITM_UN,		#품목단위
+			F_CD_NM(M.SECTR_ID, 'QTY_UN', M.ITM_UN)			AS ITM_UN_NM,		#품목단위명
+			M.TR_UN,		#주문단위
+			F_CD_NM(M.SECTR_ID, 'QTY_UN', M.TR_UN)			AS TR_UN_NM,		#주문단위명
+			M.TR_UN_IQT,	#주문단위입수
+			M.TR_QTY,		#주문수량
+# 			M.STOCK_QTY,	#재고수량
+			M.PWO_QTY,		#작업지시수량
+			M.PWP_QTY		#작업실적수량
+		
+		FROM T_TR_AGGR_L M
+			LEFT OUTER JOIN V_ITM itm
+				ON		itm.SECTR_ID	= M.SECTR_ID
+					AND itm.ITM_ID		= M.ITM_ID
+
+		WHERE	M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+			AND M.TR_AGGR_DY	= DATE_FORMAT(NOW(), '%Y-%m-%d')
+
+		ORDER BY
+			M.ITM_ID,
+			M.TR_AGGR_TM,
+			M.TR_AGGR_SN
+    </select> 
+        
+	<!-- 공지사항 -->
+    <select id="selNoticeList" parameterType="java.util.Map" resultType="java.util.HashMap">
+    	SELECT
+    		S.NOTI_ID,			#게시ID
+			S.BBS_ID,			#전자게시판ID
+			S.BBS_SN,			#전자게시판순번
+			S.SUBJCT,			#제목
+			S.ALL_NOTI_YN,		#전체게시여부
+			S.NOTI_SCOPE_CDS,	#게시범위코드
+			S.NOTI_SCOPE_NM,	#게시범위이믈
+			CASE
+				WHEN S.ALL_NOTI_YN = 'Y' THEN '전체'
+				ELSE S.NOTI_SCOPE_NM
+			END	AS NOTI_SCOPE,	#게시범위
+			S.NOTI_S_DY,		#게시시작일자
+			S.NOTI_E_DY,		#게시종료일자
+			S.NOTI_CP_NM,		#게시담당자명
+			S.NOTI_AT,			#게시첨부
+			DATE_FORMAT(S.REG_DT, '%Y-%m-%d %H:%i')	AS REG_DT		#등록일시
+
+		FROM WZ_BBS_H M
+			INNER JOIN WZ_BBS_NOTI S
+				ON		S.BBS_ID		= M.BBS_ID
+					AND S.USE_YN		= 'Y'
+					AND S.DEL_YN		= 'N'
+					AND DATE_FORMAT(NOW(), '%Y-%m-%d') BETWEEN S.NOTI_S_DY AND S.NOTI_E_DY
+					
+		WHERE	M.CO_CD		= #{SS_USER_INFO.CO_CD}
+			AND M.BBS_CD	= 'NOTI-01'
+			AND M.USE_YN	= 'Y'
+			AND M.DEL_YN	= 'N'
+			AND F_MATCH_CODES(S.NOTI_SCOPE_CDS, #{SS_USER_INFO.MEM_ROLE_CDS}) IS NOT NULL
+
+		ORDER BY
+			S.BBS_SN	DESC    
+
+    </select>
+
+ 
+</mapper>

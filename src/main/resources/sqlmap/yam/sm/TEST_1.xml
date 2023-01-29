@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	파일명	: DO_MNG.xml
+	설명		: 출하지시등록
+	수정일		 	수정자		수정내용
+	2022.04.20		이진호		최초작성
+-->
+<mapper namespace="TEST_1">
+
+    <select id="testList"  resultType="java.util.HashMap"  >
+        <![CDATA[
+     	SELECT
+            *
+        FROM
+            yam_mes.T_AO_CELL
+        ]]>
+
+    </select>
+
+
+    <select id="inWareL"  resultType="java.util.HashMap"  >
+        <![CDATA[
+        select A.*, B.item_name from yam_mes.T_WHIN_L as A inner join oms.sw_sm_item as B
+                                                                      on A.ITM_ID = B.item_cd
+        ]]>
+    </select>
+
+    <select id="releaseWare"  resultType="java.util.HashMap"  >
+        <![CDATA[
+        SELECT
+            A.*, B.item_name
+        FROM
+            yam_mes.T_DO_L as A inner join oms.sw_sm_item as B
+                                                on A.ITM_ID = B.item_cd
+        ]]>
+    </select>
+    <select id="searchAoWhinAll" resultType="java.util.HashMap"  >
+        <![CDATA[
+        SELECT
+            *
+        FROM
+            yam_mes.T_AO_WHIN_L
+        ]]>
+    </select>
+   <select id="searchAoWhin" parameterType="String" resultType="java.util.HashMap"  >
+        <![CDATA[
+        SELECT
+            A.*, B.item_name
+        FROM
+            yam_mes.T_AO_WHIN_L as A inner join oms.sw_sm_item as B
+                                                on A.A_ITM_ID = B.item_cd
+where WHIN_ID = #{value}
+        ]]>
+    </select>
+   <update id="searchAoWhinUpdate" parameterType="map" >
+       UPDATE yam_mes.T_AO_WHIN_L set A_IN_ST='Y' where A_CELL_NO = #{cell} and A_ITM_ID = #{code}
+    </update>
+    <select id="resultAoWhin" parameterType="String" resultType="java.util.HashMap"  >
+        <![CDATA[
+        SELECT
+           *
+        FROM
+            yam_mes.T_AO_WHIN_L
+
+        where A_ITM_ID = #{value}
+        ]]>
+    </select>
+    <select id="searchShOutAll" resultType="java.util.HashMap"  >
+        <![CDATA[
+        SELECT
+            *
+        FROM
+            yam_mes.T_AO_WHOUT_L
+
+        ]]>
+    </select>
+
+    <select id="searchShOutOne" resultType="java.util.HashMap"  >
+        <![CDATA[
+        SELECT
+            *
+        FROM
+            yam_mes.T_AO_WHOUT_L
+
+        ]]>
+    </select>
+</mapper>

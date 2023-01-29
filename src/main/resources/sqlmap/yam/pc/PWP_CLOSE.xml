@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: PWP_CLOSE.xml
+	설명	: 생산마감
+	수정일		 	수정자		수정내용
+	2021.10.29 	염국선		최초작성
+-->
+<mapper namespace="yam.pc.PWP_CLOSE">
+
+	<!-- 생산 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.SECTR_ID,		#회사코드
+			M.PWP_ID,			#작업실적ID
+			M.PWP_NO,			#작업실적번호
+			M.PWO_ID,			#작업지시번호
+			M.PWP_DY,			#작업실적일자
+			M.PWP_HM,			#작업실적시분
+			M.PWP_CP_ID,		#작업실적담당자ID
+			usr.USER_NM											AS PWP_CP_NM,			#작업실적담당자명
+			M.PWP_WHOUT_WH_CD,	#출고창고코드
+			F_CD_NM(M.SECTR_ID, 'WH_CD', M.PWP_WHOUT_WH_CD)		AS PWP_WHOUT_WH_CD_NM,	#출고창고명
+			M.PWP_WHIN_WH_CD,	#입고창코코드
+			F_CD_NM(M.SECTR_ID, 'WH_CD', M.PWP_WHIN_WH_CD)		AS PWP_WHIN_WH_CD_NM,	#입고창고명
+			M.PWP_ITM_ID,		#품목코드
+		    itm.ITM_CD											AS PWP_ITM_CD,
+			itm.ITM_NM											AS PWP_ITM_NM,			#품목명
+			M.PWP_ITM_UN,		#품목단위
+			F_CD_NM(M.SECTR_ID, 'QTY_UN', M.PWP_ITM_UN)			AS PWP_ITM_UN_NM,		#품목단위명
+			M.PWP_QTY,			#작업실적수량
+			M.PWP_MEMO,			#작업실적메모
+			M.PWP_ST,			#작업실적상태
+			F_CD_NM(M.SECTR_ID, 'PWP_ST', M.PWP_ST)				AS PWP_ST_NM,			#작업실적상태명
+			pwoh.PWO_NO,		#작업지시
+			pwoh.PWO_DY,		#작업지시일자
+			pwoh.PWO_QTY,		#작업지시수량
+# 			pwoh.TR_AGGR_TM,	#주문집계차수
+			M.PWP_QTY											AS CHG_PWP_QTY,			#변경작업실적수량
+			'R'													AS ROW_CRUD
+			
+		FROM T_PWP_H M
+			INNER JOIN T_PWO_H pwoh
+				ON		pwoh.SECTR_ID	= M.SECTR_ID
+					AND pwoh.PWO_ID		= M.PWO_ID
+					AND 'Y'				= M.USE_YN
+			LEFT OUTER JOIN V_ITM itm
+				ON		itm.SECTR_ID	= M.SECTR_ID
+					AND itm.ITM_ID		= M.PWP_ITM_ID
+			LEFT OUTER JOIN WZ_MEM_H usr
+				ON		usr.SECTR_ID	= M.SECTR_ID
+					AND usr.USER_ID		= M.PWP_CP_ID
+					
+		WHERE	M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+			AND M.PWP_DY		LIKE CONCAT(#{YM}, '-%')
+			AND M.PWP_ST		= '30'	# 30 : 확정
+			AND M.USE_YN 		= 'Y'
+		
+		ORDER BY
+			M.PWP_DY DESC, 
+			M.PWP_HM,
+			M.PWP_NO
+
+	</select>
+	
+	
+	<!-- 생산 투입내역 조회 -->
+	<select id="selSubList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			H.SECTR_ID,		#회사코드
+			M.PWP_ID,			#작업실적ID
+			H.PWP_NO,			#작업실적번호
+			M.PWP_SN,			#작업실적순번
+			M.PWP_IN_ITM_ID,	#투입품목코드
+		    itm.ITM_CD											AS PWP_IN_ITM_CD,
+			itm.ITM_NM											AS PWP_IN_ITM_NM,		#투입품목명
+			M.PWP_IN_ITM_UN										AS PWP_IN_ITM_UN_NM,	#투입품목단위
+			F_CD_NM(itm.SECTR_ID, 'QTY_UN', M.PWP_IN_ITM_UN)	AS PWP_IN_ITM_UN_NM,	#투입품목단위명
+			itm.ITM_GB											AS PWP_IN_ITM_GB,		#투입품목구분
+			F_CD_NM(itm.SECTR_ID, 'ITM_GB', itm.ITM_GB)			AS PWP_IN_ITM_GB_NM,	#투입품목구분명
+			M.PWP_IN_QTY,		#투입품목수량
+			M.PWP_IN_REMARKS,	#작업실적비고
+			M.PWO_ID,			#작업지시번호
+			M.PWO_SN,			#작업지시순번
+			pwol.PWO_IN_QTY,	#작업지시투입수량
+			M.PWP_IN_QTY										AS CHG_PWP_IN_QTY,		#변경작업실적투입수량
+			'R'													AS ROW_CRUD
+						
+		FROM T_PWP_L M
+
+		    INNER JOIN T_PWP_H H
+		    	ON 		H.PWP_ID	= M.PWP_ID
+		    		AND H.SECTR_ID	= #{SECTR_ID}
+
+			LEFT OUTER JOIN T_PWO_L pwol
+				ON		pwol.PWO_ID		= M.PWO_ID
+					AND pwol.PWO_SN		= M.PWO_SN
+
+			LEFT OUTER JOIN V_ITM itm
+				ON		itm.ITM_ID		= M.PWP_IN_ITM_ID
+					AND itm.SECTR_ID	= H.SECTR_ID
+
+		WHERE	M.PWP_ID		= #{PWP_ID}
+			AND M.USE_YN		= 'Y'
+
+		ORDER BY
+			M.PWP_SN
+
+	</select>
+	
+
+	<!-- 생산마감 관련 처리 -->
+ 	<select id="save" statementType="CALLABLE" parameterType="java.util.Map">
+ 		{ 
+ 			CALL PROC_PWP_CLOSE (
+ 				#{CMD, jdbcType=VARCHAR},
+ 				#{XML_TEXT, jdbcType=VARCHAR},
+ 				#{SS_USER_INFO.USER_ID, jdbcType=VARCHAR},
+ 				#{RS_MESSAGE, mode=OUT, jdbcType=VARCHAR},
+ 				#{ER_MESSAGE, mode=OUT, jdbcType=VARCHAR}
+ 			) 
+ 		}
+ 	</select>
+
+</mapper>

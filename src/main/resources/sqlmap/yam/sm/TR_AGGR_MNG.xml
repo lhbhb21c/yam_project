@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: TR_AGGR_MNG.xml
+	설명	: 주문집계관리
+	수정일		 	수정자		수정내용
+	2021.11.02 	염국선		최초작성
+-->
+<mapper namespace="yam.sm.TR_AGGR_MNG">
+
+	<!-- 주문집계 정보 조회 -->
+	<select id="selMstInfo" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.SECTR_ID,	#회사코드
+			M.TR_AGGR_DY,	#주문집계일자
+			M.TR_AGGR_TM,	#주문집계차수
+		    S.TR_AGGR_ID,	#주문집계ID
+			S.TR_AGGR_CNT,	#주문집계건수
+			S.S_OMS_NO,		#시작OMS번호
+			S.E_OMS_NO,		#종료OMS번호
+			S.TR_AGGR_MEMO,	#주문집계메모
+			S.TR_AGGR_ST	#주문집계상태
+		
+		FROM
+			(
+				SELECT
+					#{SS_USER_INFO.SECTR_ID}	AS SECTR_ID,
+					#{TR_AGGR_DY}				AS TR_AGGR_DY,
+					#{TR_AGGR_TM}				AS TR_AGGR_TM
+			) M
+			LEFT OUTER JOIN T_TR_AGGR_H S
+				ON		S.SECTR_ID	= M.SECTR_ID
+					AND S.TR_AGGR_DY	= M.TR_AGGR_DY
+					AND S.TR_AGGR_TM	= M.TR_AGGR_TM
+
+	</select>
+
+	<!-- 주문집계상세 목록 조회 -->
+	<select id="selSubList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.SECTR_ID,	#회사코드
+		    M.TR_AGGR_ID,	#주문집계ID
+			M.TR_AGGR_DY,	#주문집계일자
+			M.TR_AGGR_TM,	#주문집계차수
+			M.TR_AGGR_SN,	#주문집계순번
+		    M.ITM_ID,		#품목ID
+			itm.ITM_CD,		#품목코드
+			itm.ITM_NM,		#품목명
+			M.ITM_UN,		#품목단위
+			F_CD_NM(M.SECTR_ID, 'QTY_UN', M.ITM_UN)			AS ITM_UN_NM,		#품목단위명
+			M.TR_UN,		#주문단위
+			F_CD_NM(M.SECTR_ID, 'QTY_UN', M.TR_UN)			AS TR_UN_NM,		#주문단위명
+			M.TR_UN_IQT,	#주문단위입수
+			M.TR_QTY,		#주문수량
+# 			M.STOCK_QTY,	#재고수량
+		    M.WHOUT_QTY,	#출고수량
+			M.PWO_QTY,		#작업지시수량
+			M.PWP_QTY,		#작업실적수량
+		    M.WSF_QTY,		#창고이동수량
+			TSI.STOCK_QTY	#납품예정창고 재고수량
+		
+		FROM T_TR_AGGR_L M
+
+			LEFT OUTER JOIN V_ITM itm
+				ON		itm.SECTR_ID	= M.SECTR_ID
+					AND itm.ITM_ID		= M.ITM_ID
+
+			LEFT OUTER JOIN T_SIO_ITM TSI
+			    ON 		M.SECTR_ID		= TSI.SECTR_ID
+			        AND M.ITM_ID 		= TSI.ITM_ID
+					AND TSI.SIO_YYYY 	= SUBSTR(M.TR_AGGR_DY, 1, 4)
+					AND TSI.SIO_MM		= SUBSTR(M.TR_AGGR_DY, 6, 2)
+					AND TSI.WH_CD		= #{SIO_WH_CD} # 생산창고
+
+		WHERE	M.SECTR_ID		= #{SS_USER_INFO.SECTR_ID}
+			AND M.TR_AGGR_DY	= #{TR_AGGR_DY}
+			AND M.TR_AGGR_TM	= #{TR_AGGR_TM}
+
+		ORDER BY
+			itm.ITM_CD
+
+	</select>
+
+	<!-- 주문집계 최종 차수 조회 -->
+	<select id="selLastTmInfo" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT 
+			DATE_FORMAT(NOW(), '%Y-%m-%d') AS TR_AGGR_DY,	#주문집계일자
+			(
+				SELECT
+					CONCAT(IFNULL(MAX(TR_AGGR_TM), 0))
+				FROM T_TR_AGGR_H
+				WHERE	SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+					AND TR_AGGR_DY	= DATE_FORMAT(NOW(), '%Y-%m-%d')
+			)								AS TR_AGGR_TM	#주문집계차수
+				
+	</select>
+
+	<!-- 주문집계 관련 처리 -->
+ 	<select id="save" statementType="CALLABLE" parameterType="java.util.Map">
+ 		{ 
+ 			CALL PROC_TR_AGGR_MNG (
+ 				#{CMD, jdbcType=VARCHAR},
+ 				#{XML_TEXT, jdbcType=VARCHAR},
+ 				#{SS_USER_INFO.USER_ID, jdbcType=VARCHAR},
+ 				#{RS_MESSAGE, mode=OUT, jdbcType=VARCHAR},
+ 				#{ER_MESSAGE, mode=OUT, jdbcType=VARCHAR}
+ 			) 
+ 		}
+ 	</select>
+
+</mapper>

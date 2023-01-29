@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: PWO_LIST.xml
+	설명	: 작업지시 조회
+	수정일		 	수정자		수정내용
+	2021.10.28 	염국선		최초작성
+-->
+<mapper namespace="yam.pc.PWO_LIST">
+
+	<!-- 작업지시 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.SECTR_ID,		#회사코드
+			M.PWO_ID,			#작업지시ID
+			M.PWO_NO,			#작업지시번호
+			M.PWO_DY,			#작업지시일자
+			M.PWO_CP_ID,		#작업지시담당자ID
+			M.PWO_GB,			#작업지시구분
+			F_CD_NM(M.SECTR_ID, 'PWO_GB', M.PWO_GB)			AS PWO_GB_NM,			#작업지시구분명
+			M.PROD_TM,			#생산차수
+			F_CD_NM(M.SECTR_ID, 'PROD_TM', M.PROD_TM)		AS PROD_TM_NM,			#생산차수
+# 			M.TR_AGGR_TM,		#주문집계차수
+			M.PWO_WHOUT_WH_CD,	#작업지시출고창고코드
+			F_CD_NM(M.SECTR_ID, 'WH_CD', M.PWO_WHOUT_WH_CD)	AS PWO_WHOUT_WH_CD_NM,	#작업지시출고창고코드명
+			M.PWO_WHIN_WH_CD,	#작업지시입고창고코드
+			F_CD_NM(M.SECTR_ID, 'WH_CD', M.PWO_WHIN_WH_CD)	AS PWO_WHIN_WH_CD_NM,	#작업지시입고창고코드명
+			M.PWO_ITM_ID,		#작업지시품목코드
+			M.PWO_ITM_UN,		#작업지시품목단위
+			F_CD_NM(M.SECTR_ID, 'QTY_UN', M.PWO_ITM_UN)		AS PWO_ITM_UN_NM,		#작업지시품목단위명
+			itm.ITM_CD										AS PWO_ITM_CD,
+		    itm.ITM_NM										AS PWO_ITM_NM,			#작업지시품목명
+			itm.ITM_GB										AS PWO_ITM_GB,			#작업지시품목구분
+			F_CD_NM(itm.SECTR_ID, 'ITM_GB', itm.ITM_GB)		AS PWO_ITM_GB_NM,		#작업지시품목구분명
+			M.PWO_QTY,			#작업지시수량
+			M.PWO_MEMO,			#작업지시메모
+			M.PWO_ST,			#작업지시상태
+			F_CD_NM(M.SECTR_ID, 'PWO_ST', M.PWO_ST)			AS PWO_ST_NM,			#작업지시상태명
+			S.PWP_ID,			#작업실적ID
+			S.PWP_NO,			#작업실적번호
+			S.PWP_QTY			#작업실적수량
+
+		FROM T_PWO_H M
+			LEFT OUTER JOIN T_PWP_H S
+				ON		S.SECTR_ID	= M.SECTR_ID
+					AND S.PWO_ID	= M.PWO_ID
+					AND S.PWP_ST	IN ('10', '20', '30')
+			LEFT OUTER JOIN V_ITM itm
+				ON		itm.SECTR_ID	= M.SECTR_ID
+					AND itm.ITM_ID		= M.PWO_ITM_ID
+
+		WHERE	M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+			AND M.PWO_DY		BETWEEN	#{DY_FR} AND #{DY_TO}
+			AND M.USE_YN		= 'Y'
+
+		<if test="PWO_GBS != null and PWO_GBS.size() != 0">
+			AND M.PWO_GB		IN
+			<foreach collection="PWO_GBS" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="PWO_GBS == null or PWO_GBS.size() == 0">
+			AND 1=0
+		</if>
+
+		<if test="PWO_STS != null and PWO_STS.size() != 0">
+			AND M.PWO_ST		IN
+			<foreach collection="PWO_STS" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="PWO_STS == null or PWO_STS.size() == 0">
+			AND 1=0
+		</if>
+
+		ORDER BY
+			M.PWO_DY, 
+			M.PWO_NO
+
+	</select>
+
+</mapper>

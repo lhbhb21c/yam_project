@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: USER_ENV_MNG.xml
+	설명	: 사용자설정
+	수정일		 	수정자		수정내용
+	2022.02.28		ZNO		최초작성
+-->
+<mapper namespace="we.std.base.USER_MNG">
+
+	<!-- 사용자 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+		        M.MEM_ID,
+				M.SECTR_ID,
+				R.SECTR_NM,
+		       	R.CO_CD,
+				M.USER_ID,
+				M.USER_NM,
+				M.USER_PWD,
+				M.MEM_TY,
+				F_CD_NM(R.CO_CD, 'MEM_TY', M.MEM_TY) AS MEM_TY_NM,
+				M.MEM_GB,
+				F_CD_NM(M.SECTR_ID, 'MEM_GB', M.MEM_GB) AS MEM_GB_NM,
+				M.MEM_ROLE_CDS,
+				M.MEM_REF1,
+				M.MEM_REF2,
+				M.MEM_REF3,
+				M.ROOT_MENU_ID,
+				M.USE_YN,
+				F_CD_NM(R.CO_CD, 'USE_YN', M.USE_YN) AS USE_YN_NM,
+				M.DEL_YN,
+				M.REG_ID,
+				M.REG_DT,
+				DATE_FORMAT(M.REG_DT, '%Y-%m-%d') AS REG_DTTM,
+				M.UPD_ID,
+				M.UPD_DT,
+				'R' AS ROW_CRUD
+
+		FROM	WZ_MEM_H M
+				LEFT JOIN 	WZ_CO_SECTR R
+						ON 	M.SECTR_ID = R.SECTR_ID
+
+		WHERE	M.SECTR_ID = 
+					CASE FIND_IN_SET('SU', #{SS_USER_INFO.MEM_ROLE_CDS})
+						WHEN 0 THEN #{SS_USER_INFO.SECTR_ID}
+						ELSE M.SECTR_ID
+					END
+		
+			<if test="USER_ID != null and USER_ID != ''">
+				AND M.USER_ID = #{USER_ID}
+			</if>
+
+			<if test="USER_NM != null and USER_NM != ''">
+				AND M.USER_NM LIKE CONCAT('%', #{USER_NM}, '%')
+			</if>
+
+			<if test="MEM_TY != null and MEM_TY != ''">
+				AND M.MEM_TY = #{MEM_TY}
+			</if>
+
+			<if test="MEM_GB != null and MEM_GB != ''">
+				AND M.MEM_GB 	= #{MEM_GB}
+			</if>
+
+			<if test="MEM_ROLE_CD != null and MEM_ROLE_CD != ''">
+				AND INSTR(M.MEM_ROLE_CDS, #{MEM_ROLE_CD}) > 0
+			</if>
+
+			<if test="USE_YN != null and USE_YN != ''">
+				AND M.USE_YN = #{USE_YN}
+			</if>
+
+			<if test="DEL_YN != null and DEL_YN != ''">
+				AND M.DEL_YN = #{DEL_YN}
+			</if>
+
+			<if test="DEL_YN == null or DEL_YN == ''">
+				AND M.DEL_YN = 'N'
+			</if>
+
+		ORDER BY
+			M.MEM_ID
+
+	</select>
+
+
+	<!-- 사용자 조회 -->
+	<select id="selMstInfo" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.MEM_ID,
+			M.SECTR_ID,
+	       	R.SECTR_NM,
+			R.CO_CD,
+			M.USER_ID,
+			M.USER_NM,
+			M.USER_PWD,
+			M.MEM_TY,
+			F_CD_NM(R.CO_CD, 'MEM_TY', M.MEM_TY) AS MEM_TY_NM,
+			M.MEM_GB,
+			F_CD_NM(M.SECTR_ID, 'MEM_GB', M.MEM_GB) AS MEM_GB_NM,
+			M.MEM_ROLE_CDS,
+			M.MEM_REF1,
+			M.MEM_REF2,
+			M.MEM_REF3,
+	        CASE 	WHEN M.MEM_TY = '10' THEN ''
+					WHEN M.MEM_TY = '20' THEN (SELECT PARTNR_NM FROM WZ_PARTNR_H WHERE PARTNR_ID = M.MEM_REF1)
+	             	WHEN M.MEM_TY = '30' THEN ''
+	        END AS MEM_REF1_NM,
+	       	M.ROOT_MENU_ID,
+			R.SECTR_NM,
+			M.USE_YN,
+			F_CD_NM(R.CO_CD, 'USE_YN', M.USE_YN) AS USE_YN_NM,
+			M.DEL_YN,
+			M.REG_DT,
+			M.REG_ID,
+			DATE_FORMAT(M.REG_DT, '%Y-%m-%d') AS REG_DTTM,
+			M.UPD_ID,
+			M.UPD_DT,
+			'R' AS ROW_CRUD
+
+		FROM	WZ_MEM_H M
+			LEFT JOIN WZ_CO_SECTR R
+				ON	M.SECTR_ID = R.SECTR_ID
+
+		WHERE	M.MEM_ID	= #{MEM_ID}
+			AND M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+
+	</select>
+
+	<!-- 아이디 중복체크 -->
+	<select id="selIdDupCheck" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT 	COUNT(1) AS DUP_CNT
+		FROM 	WZ_MEM_H
+		WHERE   USER_ID = #{USER_ID}
+	</select>
+
+	<!-- 조직 목록 -->
+	<select id="selSubCoSectrList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+				S.SECTR_ID ,
+				S.SECTR_ID AS CODE_CD,
+				S.CO_CD ,
+				C.CO_NM ,
+				S.SECTR_ID ,
+				S.SECTR_NM ,
+				S.SECTR_NM AS CODE_NM,
+				S.USE_YN,
+				S.DEL_YN
+		FROM 	WZ_CO_SECTR S
+				INNER JOIN WZ_CO_H C
+						ON S.CO_CD 	= C.CO_CD
+		WHERE	S.SECTR_ID = 
+					CASE FIND_IN_SET('SU', #{SS_USER_INFO.MEM_ROLE_CDS})
+						WHEN 0 THEN #{SS_USER_INFO.SECTR_ID}
+						ELSE S.SECTR_ID
+					END
+			AND S.USE_YN = 'Y'
+			AND S.DEL_YN = 'N'
+
+	</select>
+
+	<!-- 기본메뉴 목록 -->
+	<select id="selSubRootMenuList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			ROOT_MENU_ID AS CODE_CD,
+			ROOT_MENU_NM AS CODE_NM
+
+		FROM WZ_MENU_ROOT
+		
+		WHERE	(
+					SECTR_APLY_YN = 'N' 
+					OR SECTR_ID =
+							CASE FIND_IN_SET('SU', #{SS_USER_INFO.MEM_ROLE_CDS})
+								WHEN 0 THEN #{SS_USER_INFO.SECTR_ID}
+								ELSE SECTR_ID
+							END
+				)
+			AND USE_YN = 'Y'
+			AND DEL_YN = 'N'
+
+	</select>
+
+
+	<!-- 사용자설정 관련 처리 -->
+ 	<select id="save" statementType="CALLABLE" parameterType="java.util.Map">
+ 		{ 
+ 			CALL PROC_WZ_USER_MNG (
+ 				#{CMD, jdbcType=VARCHAR},
+ 				#{XML_TEXT, jdbcType=VARCHAR},
+ 				#{SS_USER_INFO.MEM_ID, jdbcType=VARCHAR},
+ 				#{RS_MESSAGE, mode=OUT, jdbcType=VARCHAR},
+ 				#{ER_MESSAGE, mode=OUT, jdbcType=VARCHAR}
+ 			) 
+ 		}
+ 	</select>
+	
+</mapper>

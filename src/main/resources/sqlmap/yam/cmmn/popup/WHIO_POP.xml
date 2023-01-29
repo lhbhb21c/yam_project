@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	파일명	: ITM_POP.xml
+	설명	: 품목 선택 팝업
+	수정일		 	수정자		수정내용
+	2021.11.01		zno			최초작성
+-->
+<mapper namespace="yam.cmmn.popup.WHIO_POP">
+
+	<!-- 입출고내역-입고 목록 조회 -->
+	<select id="selWhioInList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+
+		SELECT
+			H.SECTR_ID,
+			H.WHIN_NO,
+			H.WHIN_DY,
+			H.WH_CD,
+			F_CD_NM(H.SECTR_ID, 'WH_CD', H.WH_CD ) 		AS WH_NM,
+			H.WHIN_GB,
+			F_CD_NM(H.SECTR_ID, 'WHIN_GB', H.WHIN_GB )	AS WHIN_GB_NM,
+			H.PARTNR_ID,
+			pt.PARTNR_NM,
+			L.WHIN_ID,
+			L.WHIN_SN,
+			L.ITM_ID,
+			L.WHIN_UN,
+			L.WHIN_QTY,
+			L.OD_ID,
+			L.OD_SN
+
+		FROM T_WHIN_H H
+			INNER JOIN 	T_WHIN_L L
+				ON		L.WHIN_ID		= H.WHIN_ID
+					AND L.ITM_ID		= #{ITM_ID}
+
+			LEFT OUTER JOIN WZ_PARTNR_H pt
+				ON	pt.PARTNR_ID	= H.PARTNR_ID
+
+		WHERE	H.SECTR_ID	=  #{SS_USER_INFO.SECTR_ID}
+			AND H.WHIN_DY		LIKE CONCAT( #{SIO_YM}, '%')
+			AND H.WHIN_ST		= '30'	#입고
+			AND SUBSTRING(H.WHIN_GB, 2, 1) = '0'	#-0:정상, 1:취소
+			<if test="WH_CD != null and WH_CD != '' ">
+				AND H.WH_CD			= #{WH_CD}
+			</if>
+
+		ORDER BY
+			H.WHIN_DY,
+			L.WHIN_ID,
+			L.WHIN_SN
+	</select>
+
+	<!-- 입출고내역 출고 목록 조회 -->
+	<select id="selWhioOutList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+
+		SELECT
+			H.SECTR_ID,
+			H.WHOUT_NO,
+			H.WHOUT_DY,
+			H.WH_CD,
+			F_CD_NM(H.SECTR_ID, 'WH_CD', H.WH_CD ) 			AS WH_NM,
+			H.WHOUT_GB,
+			F_CD_NM(H.SECTR_ID, 'WHOUT_GB', H.WHOUT_GB )	AS WHOUT_GB_NM,
+			H.PARTNR_ID,
+			pt.PARTNR_NM,
+			L.WHOUT_ID,
+			L.WHOUT_SN,
+			L.ITM_ID,
+			L.WHOUT_UN,
+			L.WHOUT_QTY,
+			L.OD_ID,
+			L.OD_SN
+
+		FROM T_WHOUT_H H
+			INNER JOIN 	T_WHOUT_L L
+				ON		L.WHOUT_ID		= H.WHOUT_ID
+					AND L.ITM_ID		= #{ITM_ID}
+
+		LEFT OUTER JOIN WZ_PARTNR_H pt
+				ON		pt.PARTNR_ID	= H.PARTNR_ID
+
+		WHERE	H.SECTR_ID		= #{SS_USER_INFO.SECTR_ID}
+			AND H.WHOUT_DY		LIKE CONCAT(#{SIO_YM}, '%')
+			AND H.WHOUT_ST		= '30'	#-출고
+			AND SUBSTRING(H.WHOUT_GB, 2, 1) = '0'	#-0:정상, 1:취소
+			<if test="WH_CD != null and WH_CD != '' ">
+				AND H.WH_CD			= #{WH_CD}
+			</if>
+
+		ORDER BY
+			H.WHOUT_DY,
+			L.WHOUT_ID,
+			L.WHOUT_SN
+
+	</select>
+
+</mapper>

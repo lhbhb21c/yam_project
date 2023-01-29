@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: PWP_YROP.xml
+	설명	: 생산수율조회
+	수정일		 	수정자		수정내용
+	2021.10.29 	XXX		최초작성
+-->
+<mapper namespace="yam.pc.PWP_YROP">
+
+	<!-- 월소요량 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			T.SECTR_ID,		#회사코드
+			#{YM}										AS PWP_IN_YM,	#투입월
+			T.PWP_IN_ITM_ID,	#투입품목코드
+			T.PWO_IN_QTY,		#투입지시수량
+			T.PWP_IN_QTY,		#투입품목수량
+			itm.ITM_CD									AS PWP_IN_ITM_CD,		#투입품목CD
+			itm.ITM_NM									AS PWP_IN_ITM_NM,		#투입품목명
+			itm.ITM_UN									AS PWP_IN_ITM_UN_NM,	#투입품목단위
+			F_CD_NM(T.SECTR_ID, 'QTY_UN', itm.ITM_UN)	AS PWP_IN_ITM_UN_NM,	#투입품목단위명
+			CASE 
+				WHEN T.PWO_IN_QTY = 0 THEN 0
+				ELSE T.PWP_IN_QTY / T.PWO_IN_QTY
+			END * 100									AS IN_RT,		#투입비율
+			CASE 
+				WHEN T.PWO_QTY = 0 THEN 0
+				ELSE T.PWP_QTY / T.PWO_QTY
+			END * 100									AS OUT_RT,		#생산비율
+			CASE 
+				WHEN T.PWP_IN_QTY = 0 OR T.PWP_QTY = 0 THEN 0
+				ELSE T.PWO_IN_QTY / T.PWP_IN_QTY * T.PWO_QTY / T.PWP_QTY
+			END * 100									AS YROP			#수율
+			
+		FROM
+			(
+				SELECT
+					M.SECTR_ID,							#회사코드
+					S.PWP_IN_ITM_ID,						#투입품목코드
+					SUM(S.PWP_IN_QTY)		AS PWP_IN_QTY,	#작업실적투입수량
+					SUM(pwol.PWO_IN_QTY)	AS PWO_IN_QTY,	#작업지시투입수량
+					SUM(M.PWP_QTY)			AS PWP_QTY,		#작업실적생산수량
+					SUM(pwoh.PWO_QTY)		AS PWO_QTY		#작업지시생산수량
+
+				FROM T_PWP_H M
+					INNER JOIN T_PWP_L S
+						ON		S.PWP_ID		= M.PWP_ID
+
+					INNER JOIN T_PWO_H pwoh
+						ON		pwoh.SECTR_ID	= M.SECTR_ID
+							AND pwoh.PWO_ID		= M.PWO_ID
+
+					LEFT OUTER JOIN T_PWO_L pwol
+						ON		pwol.PWO_ID		= S.PWO_ID
+							AND pwol.PWO_SN		= S.PWO_SN
+
+				WHERE	M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+					AND M.PWP_DY		LIKE CONCAT(#{YM}, '%')
+					AND M.PWP_ST		= '30'	# 30: 확정
+					AND M.USE_YN		= 'Y'
+					
+				GROUP BY
+					M.SECTR_ID,
+					S.PWP_IN_ITM_ID
+			) T
+			LEFT OUTER JOIN V_ITM itm
+				ON		itm.SECTR_ID	= T.SECTR_ID
+					AND itm.ITM_ID		= T.PWP_IN_ITM_ID
+					
+		<if test="ITM_CD != null and ITM_CD != '' ">
+		WHERE	(itm.ITM_CD LIKE CONCAT('%', #{ITM_CD}, '%') OR itm.ITM_NM LIKE CONCAT('%', #{ITM_CD}, '%'))
+		</if>
+					
+		ORDER BY
+			T.PWP_IN_ITM_ID
+
+	</select>
+	
+	
+	<!-- 생산내역 조회 -->
+	<select id="selSubList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			T.SECTR_ID,		#회사코드
+			CASE
+				WHEN T.PWP_SN = 0 THEN T.PWP_NO
+				ELSE NULL
+			END	AS PWP_NO,		#작업실적번호
+			CASE
+				WHEN T.PWP_SN = 0 THEN NULL
+				ELSE T.PWP_SN
+			END	AS PWP_SN,		#작업실적순번
+			CASE
+				WHEN T.PWP_SN = 0 THEN T.PWO_NO
+				ELSE NULL
+			END	AS PWO_NO,		#작업지시번호
+			CASE
+				WHEN T.PWP_SN = 0 THEN T.PWP_DY
+				ELSE NULL
+			END	AS PWP_DY,		#작업실적일자
+			itm.ITM_ID,			#품목코드ID
+			itm.ITM_CD,			#품목코드
+			T.ITM_UN,			#품목단위
+			F_CD_NM(T.SECTR_ID, 'QTY_UN', T.ITM_UN)	AS ITM_UN_NM,	#품목단위명
+			itm.ITM_NM,			#품목명
+			T.PWP_QTY,			#작업실적수량
+			T.PWO_QTY,			#작업지시수량
+			T.PWO_GB,			#작업지시구분
+			T.PWP_RT,			#생산/투입율
+			T.YROP,				#수율
+			CASE
+				WHEN T.PWP_SN = 0 THEN F_CD_NM(T.SECTR_ID, 'PWO_GB', T.PWO_GB)
+				ELSE NULL
+			END	AS PWO_GB_NM	#작업지시구분명
+
+		FROM
+			(
+				SELECT
+					M.SECTR_ID,				#회사코드
+					M.PWP_ID,
+					M.PWP_NO,					#작업실적번호
+					0				AS PWP_SN,	#작업실적순번
+					M.PWO_ID,					#작업지시번호
+				    pwoh.PWO_NO,
+					0				AS PWO_SN,	#작업지시순번
+					M.PWP_DY,					#작업실적일자
+					M.PWP_ITM_ID,				#생산품목코드
+					M.PWP_ITM_ID	AS ITM_ID,	#생산품목코드
+					M.PWP_ITM_UN	AS ITM_UN,	#품목단위
+					M.PWP_QTY,					#작업실적수량
+					CASE 
+						WHEN pwoh.PWO_QTY = 0 THEN 0
+						ELSE M.PWP_QTY / pwoh.PWO_QTY
+					END * 100	AS PWP_RT,		#생산비율
+					NULL		AS YROP,		#수율
+					pwoh.PWO_QTY,				#작업지시수량
+					pwoh.PWO_GB					#작업지시구분
+
+				FROM T_PWP_H M
+					INNER JOIN T_PWO_H pwoh
+						ON		pwoh.SECTR_ID	= M.SECTR_ID
+							AND pwoh.PWO_ID		= M.PWO_ID
+					INNER JOIN V_ITM itm
+						ON 		M.SECTR_ID		= itm.SECTR_ID
+							AND M.PWP_ITM_ID	= itm.ITM_ID
+
+				WHERE	M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+					AND M.PWP_ID		IN
+							(
+								SELECT 
+									H.PWP_ID
+								FROM T_PWP_H H
+									INNER JOIN T_PWP_L L
+										ON		L.PWP_ID		= H.PWP_ID
+											AND L.PWP_IN_ITM_ID	= #{PWP_IN_ITM_ID}
+								WHERE	H.SECTR_ID		= #{SS_USER_INFO.SECTR_ID}
+									AND H.PWP_DY		LIKE CONCAT(#{PWP_IN_YM}, '%')
+									AND H.PWP_ST		= '30'	# 30: 확정
+									AND H.USE_YN		= 'Y'
+							)
+				  AND M.USE_YN		= 'Y'
+
+							
+				UNION ALL
+
+
+				SELECT
+					M.SECTR_ID,					#회사코드
+					M.PWP_ID,						#작업실적번호
+					M.PWP_NO,						#작업실적번호
+					S.PWP_SN,						#작업실적순번
+					S.PWO_ID,						#작업지시번호
+				    pwoh.PWO_NO,
+					S.PWO_SN,						#작업지시순번
+					M.PWP_DY,						#작업실적일자
+					M.PWP_ITM_ID,					#생산품목코드
+					S.PWP_IN_ITM_ID		AS ITM_ID,	#품목코드
+					S.PWP_IN_ITM_UN		AS ITM_UN,	#품목단위
+					S.PWP_IN_QTY		AS PWP_QTY,	#작업실적수량
+					CASE 
+						WHEN pwol.PWO_IN_QTY = 0 THEN 0
+						ELSE S.PWP_IN_QTY / pwol.PWO_IN_QTY
+					END * 100		AS PWP_RT,		#투입비율
+					CASE 
+						WHEN S.PWP_IN_QTY = 0 OR M.PWP_QTY = 0 THEN 0
+						ELSE pwol.PWO_IN_QTY / S.PWP_IN_QTY * pwoh.PWO_QTY / M.PWP_QTY
+					END * 100		AS YROP,		#수율
+					pwol.PWO_IN_QTY	AS PWO_QTY,		#작업지시수량
+					pwoh.PWO_GB						#작업지시구분
+
+				FROM T_PWP_H M
+					INNER JOIN T_PWP_L S
+						ON		S.PWP_ID		= M.PWP_ID
+
+					INNER JOIN T_PWO_H pwoh
+						ON		pwoh.SECTR_ID	= M.SECTR_ID
+							AND pwoh.PWO_ID		= M.PWO_ID
+
+					LEFT OUTER JOIN T_PWO_L pwol
+						ON		pwol.PWO_ID		= S.PWO_ID
+							AND pwol.PWO_SN		= S.PWO_SN
+
+
+				WHERE	M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+					AND M.PWP_NO		IN 
+							(
+								SELECT 
+									H.PWP_NO
+								FROM T_PWP_H H
+									INNER JOIN T_PWP_L L
+										ON		L.PWP_ID		= H.PWP_ID
+											AND L.PWP_IN_ITM_ID	= #{PWP_IN_ITM_ID}
+								WHERE	H.SECTR_ID		= #{SS_USER_INFO.SECTR_ID}
+									AND H.PWP_DY		LIKE CONCAT(#{PWP_IN_YM}, '%')
+									AND H.PWP_ST		= '30'	# 30: 확정
+								  	AND H.USE_YN		= 'Y'
+							)
+				  AND M.USE_YN		= 'Y'
+			) T
+			LEFT OUTER JOIN V_ITM itm
+				ON		itm.SECTR_ID	= T.SECTR_ID
+					AND itm.ITM_ID		= T.ITM_ID
+		
+		ORDER BY
+			T.PWP_DY,
+			T.PWP_NO,
+			T.PWP_SN
+
+	</select>
+
+</mapper>

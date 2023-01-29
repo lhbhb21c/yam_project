@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: BOM_LIST.xml
+	설명	: BOM 조회
+	수정일		 	수정자		수정내용
+	2020.12.09 	     심정민		최초작성
+-->
+<mapper namespace="yam.mm.BOM_LIST">
+
+    <!-- BOM 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			boh.COMPANY_CD,					# 회사 코드
+			boh.BOM_NO,						# BOM 번호
+			boh.ITM_CD		AS H_ITM_CD,	# 품목 코드
+			itm.ITM_NM 		AS H_ITM_NM,	# 품목 이름	
+			boh.ITM_UN		AS H_QTY_UN,	# 품목 단위
+			boh.ITM_QTY		AS H_ITM_QTY,	# 품목 수량
+			F_CD_NM(boh.COMPANY_CD,'QTY_UN',boh.ITM_UN)		AS QTY_UN_NM, # 품목 단위명
+			itm.ITM_GB,						# 품목 구분
+			F_CD_NM(boh.COMPANY_CD, 'ITM_GB', itm.ITM_GB)	AS ITM_GB_NM, # 품목 구분명
+			boh.APLY_S_DY,					# 적용 시작 일자 
+			boh.APLY_E_DY,					# 적용 종료 일자
+			boh.PROC_CD		AS H_PROC_CD, 	# 공정코드
+			F_CD_NM(boh.COMPANY_CD, 'PROC_CD', boh.PROC_CD)	AS H_PROC_CD_NM, # 공정 코드명
+		    IF (bol.PROC_CD IS NULL, boh.PROC_CD, bol.PROC_CD) AS PROC_CD,
+			
+			bol.ITM_CD		AS L_ITM_CD,	# 품목 코드 
+			itml.ITM_NM		AS L_ITM_NM,	# 품목 이름
+			bol.ITM_UN		AS L_QTY_UN,	# 수량 단위
+			F_CD_NM(bol.COMPANY_CD,'QTY_UN',bol.ITM_UN)		AS L_QTY_UN_NM, # 품목 단위명
+			bol.ITM_QTY		AS L_CONSM_QTY,	# 소요 수량
+			bol.PROC_CD		AS L_PROC_CD,	# 공정코드
+			F_CD_NM(boh.COMPANY_CD, 'PROC_CD', bol.PROC_CD)	AS L_PROC_CD_NM, # 공정 코드명
+
+			bol.BOM_LN,						# BOM 라인번호 
+			bol.PARENT_BOM_LN,				# PARENT BOM 라인번호 
+			bol.BOM_SN,						# BOM 순번 
+			bol.BOM_LVL,					# BOM 레벨
+			bol.BOM_LVL_SN,					# BOM 레벨 순번
+			bol.USE_YN						# 사용 여부 
+			
+		FROM T_BOM_H boh
+			INNER JOIN T_BOM_L bol
+				ON 		bol.COMPANY_CD	= boh.COMPANY_CD
+					AND bol.BOM_NO		= boh.BOM_NO
+			
+			LEFT OUTER JOIN V_ITM itm
+				ON		boh.COMPANY_CD	= itm.COMPANY_CD
+					AND boh.ITM_CD		= itm.ITM_CD			
+			
+			LEFT OUTER JOIN V_ITM itml
+				ON		bol.COMPANY_CD	= itml.COMPANY_CD
+					AND bol.ITM_CD		= itml.ITM_CD
+							
+		WHERE	boh.COMPANY_CD	= #{SS_USER_INFO.COMPANY_CD}
+
+		<if test="ITM_CD != null and ITM_CD != '' ">
+			AND boh.ITM_CD	LIKE CONCAT('%', #{ITM_CD}, '%')
+		</if>
+
+		<if test="ITM_NM != null and ITM_NM != '' ">
+			AND itm.ITM_NM	LIKE CONCAT('%', #{ITM_NM}, '%')
+		</if>
+		
+		<if test="USE_YN != null and USE_YN != '' ">
+			AND boh.USE_YN	= #{USE_YN}
+		</if>
+		
+		<if test="QTY_UN != null and QTY_UN != '' ">
+			AND boh.ITM_QTY	= #{QTY_UN}
+		</if>	
+
+		ORDER BY 
+			boh.BOM_NO,
+			bol.BOM_LVL_SN,
+			bol.BOM_SN
+			
+	</select>
+	
+	
+</mapper>

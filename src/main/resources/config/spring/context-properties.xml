@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd
+		">
+
+
+	<!-- configuration properties -->
+	<util:properties id="props" location="classpath:/config/properties/*.properties" />
+
+	<!-- 속성값 암/복호 -->
+	<bean id="propCipher" class="we.std.core.PropCipher">
+	</bean>
+	
+    <!-- 프로퍼티 속성 가공 처리(org.springframework.beans.factory.config.PropertyPlaceholderConfigurer) -->
+    <bean id="propertyHolder" class="we.cmmn.spring.WePropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:/config/properties/*.properties</value>
+            </list>
+        </property>
+		<!-- 속성 복호화시 복호화 모듈 설정(속성값은 ENC(암호화문자) 형식이어야 함) -->
+		<property name="cipher">
+			<ref bean="propCipher" />
+		</property>
+		<!-- application name(미설정시 /application.properties의 app.name 값으로 대치함) -->
+<!-- 		<property name="appName"> -->
+<!-- 			<value>yam_dev</value> -->
+<!-- 		</property> -->
+        <property name="placeholderPrefix" value="props#[" />
+        <property name="placeholderSuffix" value="]"    />
+    </bean>
+
+</beans>

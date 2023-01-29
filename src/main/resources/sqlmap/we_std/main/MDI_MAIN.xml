@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: MDI_MAIN.xml
+	설명	: standard main
+	수정일		 	수정자		수정내용
+	2022.03.07	염국선		최초작성
+-->
+<mapper namespace="we.std.main.MDI_MAIN">
+
+    <!-- 메뉴 목록 조회 -->
+	<select id="selMenuList" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT
+			M.MENU_ID,
+			M.ROOT_MENU_ID,
+			M.PARENT_MENU_ID,
+			M.MENU_NM,
+			M.MENU_GB,		#메뉴구분-10: 메뉴,20: 실행
+			M.MENU_LVL,
+			M.MENU_SN,
+			M.MENU_ICON,
+			M.HID_YN,
+			S.PGM_ID,
+			S.PGM_CD,
+			S.PGM_CMD,
+			S.PGM_TY,		#메뉴유형-10: 일반,90: 시스템
+			S.PGM_GB		#메뉴구분-10: 일반
+			
+		FROM WZ_MENU_H M
+			LEFT OUTER JOIN WZ_MENU_H P
+				ON	P.MENU_ID = M.PARENT_MENU_ID
+			LEFT OUTER JOIN WZ_PGM_H S
+				ON		S.PGM_ID	= M.PGM_ID
+					AND S.USE_YN	= 'Y'
+					AND S.DEL_YN	= 'N'
+					
+		WHERE	M.ROOT_MENU_ID	= (SELECT ROOT_MENU_ID FROM WZ_MEM_H WHERE MEM_ID = #{SS_USER_INFO.MEM_ID})
+			AND M.USE_YN		= 'Y'
+			AND M.DEL_YN		= 'N'
+			AND (M.MENU_LVL = 1 OR F_MATCH_CODES(M.MEM_ROLE_CDS, #{SS_USER_INFO.MEM_ROLE_CDS}) IS NOT NULL)
+			
+		ORDER BY
+			CASE 
+				WHEN M.MENU_LVL = 1 THEN M.MENU_SN
+				WHEN M.MENU_LVL = 2 THEN P.MENU_SN
+			END,
+			M.MENU_LVL,
+			M.MENU_SN
+			
+	</select>
+	
+
+    <!-- 2레벨공통코드 목록 조회 -->
+	<select id="selCmmnCd2List" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT
+			CD1.CD_KEY		AS CODE_CD_L,
+			CD1.CD_NM		AS CODE_NM_L,
+			CD2.CD_KEY		AS CODE_CD_M,
+			CD2.CD_NM		AS CODE_NM_M,
+			CD2.USRDF1		AS USRDF_1
+			
+		FROM WZ_CD_H CD1
+			INNER JOIN WZ_CD_H CD2
+				ON		CD2.PARENT_CD_ID		= CD1.CD_ID
+					AND IFNULL(CD2.DEL_YN,'N')	= 'N'
+					AND IFNULL(CD2.DEL_YN,'N')	= 'N'
+					
+		WHERE	CD1.CD_LVL				= 1
+			AND IFNULL(CD1.USE_YN,'Y')	= 'Y'
+			AND IFNULL(CD2.USE_YN,'Y')	= 'Y'
+
+		ORDER BY
+			CD1.CD_KEY,
+			CD2.CD_SN
+    </select>
+    
+
+    <!-- 3레벨공통코드 목록 조회 -->
+	<select id="selCmmnCd3List" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT
+			CD1.CD_KEY	AS CODE_CD,
+			CD2.CD_KEY	AS CODE_CD_L,
+			CD2.CD_NM	AS CODE_NM_L,
+			CD3.CD_KEY	AS CODE_CD_M,
+			CD3.CD_NM	AS CODE_NM_M
+
+		FROM WZ_CD_H CD1
+			INNER JOIN WZ_CD_H CD2
+				ON		CD2.PARENT_CD_ID	= CD1.CD_ID
+					AND IFNULL(CD2.USE_YN,'')	= 'Y'
+					AND IFNULL(CD2.DEL_YN,'')	= 'N' 
+			INNER JOIN WZ_CD_H CD3
+				ON		CD3.PARENT_CD_ID	= CD2.CD_ID
+					AND IFNULL(CD3.USE_YN,'')	= 'Y'
+					AND IFNULL(CD3.DEL_YN,'')	= 'N' 
+		WHERE	CD1.CD_LVL				= 1
+			AND IFNULL(CD1.USE_YN,'')	= 'Y'
+			AND IFNULL(CD1.DEL_YN,'')	= 'N'
+
+		ORDER BY
+			CD1.CD_KEY,
+			CD2.CD_KEY,
+			CD3.CD_SN
+	
+    </select>
+
+
+    <!-- 로깅 -->
+ 	<select id="pgmUseLog" statementType="CALLABLE" parameterType="java.util.Map">
+ 		{ 
+ 			CALL PROC_WZ_PGM_USE_LOG (
+ 				#{CMD, jdbcType=VARCHAR},
+ 				#{SS_USER_INFO.MEM_ID, jdbcType=VARCHAR},
+ 				#{PGM_ID, jdbcType=VARCHAR},
+ 				#{LOG_CN, jdbcType=VARCHAR},
+ 				#{RS_MESSAGE, mode=OUT, jdbcType=VARCHAR},
+ 				#{ER_MESSAGE, mode=OUT, jdbcType=VARCHAR}
+ 			)
+ 		}
+ 	</select>
+
+	
+</mapper>

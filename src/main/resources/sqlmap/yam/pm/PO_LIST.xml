@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: PO_LIST.xml
+	설명		: 구매발주 조회
+	수정일		 	수정자		수정내용
+	2022.04.11 		이진호		최초작성
+-->
+<mapper namespace="yam.pm.PO_LIST">
+
+	<!-- 구매발주 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			H.PO_ID,
+			H.SECTR_ID,
+			H.PO_NO,
+			H.PO_ST,
+			F_CD_NM(H.SECTR_ID, 'PO_ST', H.PO_ST) AS PO_ST_NM,
+			H.PO_DY,
+			H.PO_CP_ID,
+			M.USER_NM AS PO_CP_NM,
+			H.PARTNR_ID,
+			P.PARTNR_NM,
+			H.DUE_DY,
+			H.WHIN_WH_CD,
+            F_CD_NM(H.SECTR_ID, 'WH_CD', H.WHIN_WH_CD) AS WHIN_WH_NM,
+			H.CUR_CD,
+            F_CD_NM(H.SECTR_ID, 'CUR_CD', H.CUR_CD) AS CUR_CD_NM,
+			H.TX_CD,
+            F_CD_NM(H.SECTR_ID, 'TX_CD', H.TX_CD) AS TX_CD_NM,
+			H.DOG_DY,
+			H.TOT_PO_SPL_AM,
+			H.TOT_PO_VAT,
+			H.TOT_PO_SUM_AM,
+			H.PO_REMARKS,
+			H.OD_ID,
+			H.CNFM_DY,
+			H.USE_YN,
+			H.REG_ID,
+			H.REG_DT,
+			H.UPD_ID,
+			H.UPD_DT,
+			'R'                                 AS ROW_CRUD
+
+		FROM T_PO_H H
+		        LEFT JOIN WZ_MEM_H M    ON H.PO_CP_ID   = M.MEM_ID
+		        LEFT JOIN WZ_PARTNR_H P ON H.PARTNR_ID  = P.PARTNR_ID
+		<where>
+
+			AND H.USE_YN = 'Y'
+            AND H.PO_DY	BETWEEN	#{DY_FR} AND #{DY_TO}
+
+
+            <if test="PO_GBS != null and PO_GBS.size() != 0">
+                AND H.PO_GB		IN
+                <foreach collection="PO_GBS" item="item"  open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="PO_GBS == null or PO_GBS.size() == 0">
+                AND 1=0
+            </if>
+
+            <if test="PO_STS != null and PO_STS.size() != 0">
+                AND H.PO_ST		IN
+                <foreach collection="PO_STS" item="item"  open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="PO_STS == null or PO_STS.size() == 0">
+                AND 1=0
+            </if>
+		</where>
+	</select>
+
+</mapper>

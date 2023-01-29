@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: PGM_USE_LOG.xml
+	설명	: 사용자 LOG
+	수정일			수정자		수정내용
+	2021.02.01	이경수		최초작성
+-->
+<mapper namespace="we.std.base.PGM_USE_LOG">
+	
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.LOG_ID,
+			M.MEM_ID,
+			mem.SECTR_ID,
+			mem.USER_ID,
+			mem.USER_NM,
+			sec.SECTR_NM,
+			sec.CO_CD,
+			M.PGM_ID,
+			M.LOG_CN,
+			DATE_FORMAT(M.REG_DT, '%Y-%m-%d %H:%i:%s') AS REG_DT
+		
+		FROM WZ_PGM_USE_LOG M
+			INNER JOIN WZ_MEM_H mem
+				ON		mem.MEM_ID = M.MEM_ID
+		<if test="USER_NM != null and USER_NM != '' ">
+					AND	mem.USER_NM	LIKE CONCAT('%', #{USER_NM}, '%')
+		</if>
+			INNER JOIN WZ_CO_SECTR sec
+				ON		sec.SECTR_ID	= mem.SECTR_ID
+					and sec.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+					
+		WHERE	DATE_FORMAT(M.REG_DT, '%Y-%m-%d')  BETWEEN #{REG_DY_FR}	AND	#{REG_DY_TO}
+
+		ORDER BY
+			M.LOG_ID
+
+	</select>
+	
+</mapper>

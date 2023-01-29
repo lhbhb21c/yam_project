@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: SC_REG.xml
+	설명	: 재고실사등록
+	수정일		 	수정자		수정내용
+	2021.11.02		zno			최초작성
+-->
+<mapper namespace="yam.wm.SC_REG">
+
+    <!-- 재고실사 기본 조회 -->
+	<select id="selMst" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+
+		SELECT
+		       	SC_ID,
+				SECTR_ID,
+				SC_NO,
+				SC_DY,
+				SC_GB,
+				F_CD_NM(SECTR_ID, 'SC_GB', SC_GB)		AS SC_GB_NM,		# 실사 구분 명
+				WH_CD,
+				F_CD_NM(SECTR_ID, 'WH_CD', WH_CD)		AS WH_NM,			# 창고명
+				REMARKS,
+				SC_ST,
+				F_CD_NM(SECTR_ID, 'SC_ST', SC_ST)		AS SC_ST_NM,		# 실사 상태 명
+				USE_YN,
+				'R' 	AS ROW_CRUD
+
+		FROM 	T_SC_H	TSH
+		WHERE	SECTR_ID 		= #{SS_USER_INFO.SECTR_ID}
+		AND		SC_ID			= #{SC_ID}
+		AND		USE_YN				= 'Y'
+
+	</select>
+	
+
+    <!-- 재고실사 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+
+		SELECT
+			TSH.SECTR_ID,																#섹터ID
+			TSL.SC_ID,																	#재고실사번호
+			TSL.ITM_ID,																	#품목코드
+			ITM.ITM_CD,
+			ITM.ITM_NM,																	#품목명
+			ITM.ITM_GB,																	#품목구분
+			F_CD_NM(ITM.SECTR_ID, 'ITM_GB', ITM.ITM_GB) 			AS ITM_GB_NM,		#품목구분명
+			TSL.SC_STOCK_GB,															#재고실사재고구분
+			TSL.SC_UN,																	#수량단위
+			TSL.STOCK_QTY,																#재고수량
+			TSL.SC_QTY,																	#재고실사수량
+			IFNULL(TSL.STOCK_QTY, 0) - IFNULL(TSL.SC_QTY, 0) 		AS DIFF_QTY,		#차이수량
+			TSL.SC_STOCK_GB,															#재고실사재고구분
+			F_CD_NM(TSH.SECTR_ID, 'SC_STOCK_GB', TSL.SC_STOCK_GB) AS SC_STOCK_GB_NM,	#재고실사재고구분명
+			TSL.SC_PRC,																	#재고실사단가
+			TSL.SC_AM,																	#재고실사금액
+			'R'	AS ROW_CRUD
+
+		FROM T_SC_L TSL
+		    LEFT JOIN T_SC_H TSH
+		    	ON 		TSH.SC_ID		= TSL.SC_ID
+			LEFT OUTER JOIN V_ITM ITM
+				ON 		ITM.SECTR_ID	= TSH.SECTR_ID
+					AND ITM.ITM_ID		= TSL.ITM_ID
+
+		WHERE	TSH.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+			AND	TSL.SC_ID		= #{SC_ID}
+			AND TSL.USE_YN		= 'Y'
+
+		ORDER BY
+			ITM.ITM_CD,
+			TSL.SC_STOCK_GB DESC
+	</select>
+	
+
+	<!-- SC 관련 처리 -->
+	<select id="save" statementType="CALLABLE" parameterType="java.util.Map">
+ 		{ 
+ 			CALL PROC_SC_REG (
+ 				#{CMD, jdbcType=VARCHAR},
+ 				#{XML_TEXT, jdbcType=VARCHAR},
+ 				#{SS_USER_INFO.MEM_ID, jdbcType=VARCHAR},
+ 				#{RS_MESSAGE, mode=OUT, jdbcType=VARCHAR},
+ 				#{ER_MESSAGE, mode=OUT, jdbcType=VARCHAR}
+ 			)
+ 		}
+ 	</select>	
+	
+</mapper>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	파일명	: ITM_POP.xml
+	설명	: 품목 선택 팝업
+	수정일		 	수정자		수정내용
+	2021.10.18 	염국선		최초작성
+-->
+<mapper namespace="yam.cmmn.popup.ITM_POP">
+
+	<!-- 마스터 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.ITM_ID,				#품목ID 
+			M.SECTR_ID,				#섹터ID 
+			M.ITM_CD,				#품목코드 
+			M.ITM_NM,				#품목이름
+			M.ITM_GB,				#품목구분
+			F_CD_NM(M.SECTR_ID, 'ITM_GB', M.ITM_GB)			AS ITM_GB_NM,		#품목구분명
+			M.ITM_UN,				#품목단위
+			F_CD_NM(M.SECTR_ID, 'QTY_UN', M.ITM_UN)			AS ITM_UN_NM,		#품목단위명
+			M.PROC_CD,				#공정코드
+			F_CD_NM(M.SECTR_ID, 'PROC_CD', M.PROC_CD)		AS PROC_CD_NM,		#공정코드명
+			M.SIO_MNG_GB,			#재고수불구분
+			F_CD_NM(M.SECTR_ID, 'SIO_MNG_GB', M.SIO_MNG_GB)	AS SIO_MNG_GB_NM	#재고수불구분명
+			
+		FROM V_ITM M
+
+		WHERE	M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+			AND	M.USE_YN	= 'Y'
+
+		<if test="FIX_ITM_GB != null">
+			AND M.ITM_GB		IN
+			<foreach collection="FIX_ITM_GB" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		
+		<if test="ITM_CD != null and ITM_CD != '' ">
+			AND (M.ITM_CD LIKE CONCAT('%', #{ITM_CD}, '%') OR M.ITM_NM LIKE CONCAT('%', #{ITM_CD}, '%'))
+		</if>
+
+	</select>
+
+</mapper>

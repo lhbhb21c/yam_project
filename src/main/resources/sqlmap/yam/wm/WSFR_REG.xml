@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: WSFR_REG.xml
+	설명	: 창고이동 관리
+	수정일		 	수정자		수정내용
+	2021.10.26 	염국선		최초작성
+-->
+<mapper namespace="yam.wm.WSFR_REG">
+
+	<!-- 창고이동 정보 조회 -->
+	<select id="selMstInfo" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.WSFR_ID,			#창고이동요청ID
+			M.SECTR_ID,			#섹터ID
+			M.WSFR_NO,			#창고이동요청번호
+			M.WSFR_DY,			#창고이동요청일자
+			M.WSFR_GB,			#창고이동구분
+			M.WHOUT_WH_CD,		#출고창고코드
+			M.WHIN_WH_CD,		#입고창고코드
+			M.AUTO_WHIO_YN,		#자동입출고여부
+			M.WSFR_ST			#창고이동상태
+			
+		FROM T_WSFR_H M
+
+		WHERE	M.WSFR_ID	= #{WSFR_ID}
+			
+	</select>
+	
+		
+	<!-- 창고이동 항목 내역 조회 -->
+	<select id="selSubList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.WSFR_ID,			#창고이동요청ID
+			M.SECTR_ID,			#섹터ID
+			M.WSFR_NO,			#창고이동요청번호
+			M.WSFR_DY,			#창고이동요청일자
+			M.WSFR_GB,			#창고이동구분
+			M.WHOUT_WH_CD,		#출고창고코드
+			F_CD_NM(M.SECTR_ID, 'WH_CD', M.WHOUT_WH_CD)	AS WHOUT_WH_CD_NM,	#출고창고명
+			M.WHIN_WH_CD,		#입고창고코드
+			F_CD_NM(M.SECTR_ID, 'WH_CD', M.WHIN_WH_CD)	AS WHIN_WH_CD_NM,	#입고창고명
+			M.WSFR_ST,			#창고이동상태
+			S.WSFR_SN,			#창고이동순번
+			S.ITM_ID,			#품목ID
+			itm.ITM_CD,			#품목코드
+			itm.ITM_NM,			#폼목명
+			itm.ITM_GB,			#품목구분
+			F_CD_NM(itm.SECTR_ID, 'ITM_GB', itm.ITM_GB)	AS ITM_GB_NM,		#품목구분명
+			S.WSFR_UN,			#창고이동단위
+			F_CD_NM(M.SECTR_ID, 'QTY_UN', S.WSFR_UN)	AS WSFR_UN_NM,		#창고이동단위명
+			S.WSFR_QTY,			#창고이동수량
+			'R'	AS ROW_CRUD
+						
+		FROM T_WSFR_H M
+			INNER JOIN T_WSFR_L S
+				ON	S.WSFR_ID	= M.WSFR_ID
+			LEFT OUTER JOIN V_ITM itm
+				ON	itm.ITM_ID	= S.ITM_ID
+	
+		WHERE	M.WSFR_ID	= #{WSFR_ID}
+
+		ORDER BY
+			S.WSFR_SN
+
+	</select>
+
+	<!-- 주문집계에서 온 것들 -->
+	<select id="selItmList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+				M.SECTR_ID,		# 섹터ID
+				M.SIO_YYYY,			# 재고수불번호
+				M.SIO_MM,			# 재고수불순번
+				M.WH_CD,			# 창고
+				F_CD_NM(M.SECTR_ID, 'WH_CD', M.WH_CD)		AS WH_NM,		#창고명
+				M.ITM_ID,			# 품목ID
+				ITM.ITM_CD,			# 품목코드
+				ITM.ITM_NM,			# 품목명
+				L.TR_AGGR_ID								AS OD_ID,
+		        L.TR_AGGR_SN								AS OD_SN,
+				F_CD_NM(M.SECTR_ID, 'ITM_GB', ITM.ITM_GB)	AS ITM_GB_NM,	#제품구분
+				M.SIO_UN									AS WSFR_UN,	# 재고수불단위
+				M.BS_QTY,			# 기초수량
+				M.WHIN_QTY,			# 입고수량
+				M.TRD_WHIN_QTY,		# 거래입고수량
+				M.PROD_WHIN_QTY,	# 생산입고수량
+				M.WSF_WHIN_QTY,		# 창고이동입고수량
+				M.SC_WHIN_QTY,		# 재고실사입고수량
+				M.ETC_WHIN_QTY,		# 기타입고수량
+				M.WHOUT_QTY,		# 출고수량
+				M.TRD_WHOUT_QTY,	# 거래출고수량
+				M.PROD_WHOUT_QTY,	# 생산출고수량
+				M.WSF_WHOUT_QTY,	# 창고이동출고수량
+				M.SC_WHOUT_QTY,		# 재고실사출고수량
+				M.ETC_WHOUT_QTY,	# 기타 출고수량
+				M.STOCK_QTY,			#현재고수량
+				M.STOCK_QTY 		AS WSFR_QTY			#현재고수량
+		FROM 	T_TR_AGGR_L L
+				INNER JOIN T_SIO_ITM M
+		    		ON 		L.ITM_ID 	= M.ITM_ID
+				INNER JOIN  V_ITM ITM
+					ON		ITM.ITM_ID	= M.ITM_ID
+						AND M.SECTR_ID	= ITM.SECTR_ID
+
+		WHERE	M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID, jdbcType=VARCHAR}
+			AND M.SIO_YYYY		= substr(#{SIO_YM}, 1, 4)
+			AND M.SIO_MM		= substr(#{SIO_YM}, 6, 2)
+
+		<if test="TR_AGGR_ID != null and TR_AGGR_ID != ''">
+			AND L.TR_AGGR_ID	= #{TR_AGGR_ID}
+
+		  </if>
+		<if test="ITM_IDS != null and ITM_IDS.size() != 0">
+			AND M.ITM_ID		IN
+			<foreach collection="ITM_IDS" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="ITM_ID != null and ITM_ID != ''">
+			AND M.ITM_ID	= #{ITM_ID}
+		</if>
+
+		<if test="WH_CDS != null and WH_CDS.size() != 0">
+			AND M.WH_CD			IN
+			<foreach collection="WH_CDS" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+
+
+		ORDER BY
+			M.ITM_ID,
+			M.WH_CD
+
+
+
+<!--		SELECT-->
+<!--				M.SECTR_ID,			#섹터ID-->
+<!--				M.ITM_CD,				#품목코드-->
+<!--				M.ITM_NM,				#품목이름-->
+<!--				M.ITM_GB,				#품목구분-->
+<!--				F_CD_NM(M.SECTR_ID, 'ITM_GB', M.ITM_GB)			AS ITM_GB_NM,		#품목구분명-->
+<!--				M.ITM_UN,				#품목단위-->
+<!--				F_CD_NM(M.SECTR_ID, 'QTY_UN', M.ITM_UN)			AS ITM_UN_NM,		#품목단위명-->
+<!--				M.PROC_CD,				#공정코드-->
+<!--				F_CD_NM(M.SECTR_ID, 'PROC_CD', M.PROC_CD)			AS PROC_CD_NM,		#공정코드명-->
+<!--				M.SIO_MNG_GB,			#재고수불구분-->
+<!--				F_CD_NM(M.SECTR_ID, 'SIO_MNG_GB', M.SIO_MNG_GB)	AS SIO_MNG_GB_NM	#재고수불구분명-->
+
+<!--		FROM 	V_ITM M-->
+
+<!--		WHERE	M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID, jdbcType=VARCHAR}-->
+<!--			AND	M.USE_YN		= 'Y'-->
+
+<!--		<if test="FIX_ITM_GB != null">-->
+<!--			AND M.ITM_GB		IN-->
+<!--			<foreach collection="FIX_ITM_GB" item="item"  open="(" close=")" separator=",">-->
+<!--				#{item}-->
+<!--			</foreach>-->
+<!--		</if>-->
+
+<!--		<if test="ITM_CD != null and ITM_CD != '' ">-->
+<!--			AND (M.ITM_CD LIKE CONCAT('%', #{ITM_CD}, '%') OR M.ITM_NM LIKE CONCAT('%', #{ITM_CD}, '%'))-->
+<!--		</if>-->
+
+	</select>
+
+
+	<!-- 창고이동 관련 처리 -->
+ 	<select id="save" statementType="CALLABLE" parameterType="java.util.Map">
+ 		{ 
+ 			CALL PROC_WSFR_MNG (
+ 				#{CMD, jdbcType=VARCHAR},
+ 				#{XML_TEXT, jdbcType=VARCHAR},
+ 				#{SS_USER_INFO.MEM_ID, jdbcType=VARCHAR},
+ 				#{RS_MESSAGE, mode=OUT, jdbcType=VARCHAR},
+ 				#{ER_MESSAGE, mode=OUT, jdbcType=VARCHAR}
+ 			) 
+ 		}
+ 	</select>
+
+</mapper>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: ITM_LIST.xml
+	설명	: 품목 조회
+	수정일		 	수정자		수정내용
+	2021.11.03	정래훈		최초작성
+-->
+<mapper namespace="yam.mm.ITM_LIST">
+
+    <!-- 품목 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.SECTR_ID,				# 회사 ID
+			M.ITM_ID,				# 품목 ID
+			M.ITM_CD,				# 품목 코드
+			M.ITM_NM,				# 품목 이름
+			M.ITM_GB,				# 품목 구분
+			F_CD_NM(M.SECTR_ID, 'ITM_GB', M.ITM_GB)			AS ITM_GB_NM,		#품목구분명
+			M.ITM_GRP,				# 품목 그룹	
+			F_CD_NM(M.SECTR_ID, 'ITM_GRP', M.ITM_GRP)			AS ITM_GRP_NM,		#품목그룹명
+			M.ITM_SPEC,				# 품목 규격
+			M.ITM_UN,				# 품목 단위
+			F_CD_NM(M.SECTR_ID, 'QTY_UN', M.ITM_UN)			AS ITM_UN_NM,		#품목단위명
+			M.ITM_WT,				# 품목 증량
+			M.ITM_VOL,				# 품목 용량
+			M.PROC_CD,				# 공정 코드
+			F_CD_NM(M.SECTR_ID, 'PROC_CD', M.PROC_CD)			AS PROC_CD_NM, # 공정 코드명
+			M.SAF_STOCK_QTY,		# 안전 재고 수량
+			M.EXPRDY,				# 유통기한
+			M.REMARKS,				# 비고
+			M.SIO_MNG_GB,			# 재고수불관리구분
+			F_CD_NM(M.SECTR_ID, 'SIO_MNG_GB', M.SIO_MNG_GB)	AS SIO_MNG_GB_NM,	# 재고수불관리구분명
+			M.MES_YN,				# MES 여부	 			
+			M.USE_YN				# 사용 여부
+								
+		FROM V_ITM M
+													
+		WHERE	M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+
+		<if test="ITM_ID != null and ITM_ID != '' ">
+			AND (M.ITM_ID LIKE CONCAT('%', #{ITM_ID}, '%')
+
+		  </if>
+		<if test="ITM_CD != null and ITM_CD != '' ">
+			AND (M.ITM_CD LIKE CONCAT('%', #{ITM_CD}, '%') OR M.ITM_NM LIKE CONCAT('%', #{ITM_CD}, '%'))
+		</if>
+
+		<if test="ITM_GBS != null and ITM_GBS.size() != 0">
+			AND  M.ITM_GB		IN
+			<foreach collection="ITM_GBS" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="ITM_GBS == null or ITM_GBS.size() == 0">
+			AND 1=0
+		</if>
+		
+		<if test="ITM_GRPS != null and ITM_GRPS.size() != 0">
+			AND  M.ITM_GRP		IN
+			<foreach collection="ITM_GRPS" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="ITM_GRPS == null or ITM_GRPS.size() == 0">
+			AND 1=0
+		</if>
+
+		<if test="USE_YN != null and USE_YN != '' ">
+			AND M.USE_YN		= #{USE_YN}
+		</if>
+		
+	</select>
+
+</mapper>

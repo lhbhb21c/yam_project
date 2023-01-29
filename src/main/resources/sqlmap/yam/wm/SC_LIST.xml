@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: SC_LIST.xml
+	설명	: 재고실사등록
+	수정일		 	수정자		수정내용
+	2021.11.02	zno		최초작성
+-->
+<mapper namespace="yam.wm.SC_LIST">
+
+    <!-- 재고실사 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+
+		SELECT
+			SC_ID,														# 실사 ID
+			SECTR_ID,
+			SC_NO,														# 실사 번호
+			SC_DY,														# 실사 일자
+			SC_GB,														# 실사 구분
+			F_CD_NM(SECTR_ID, 'SC_GB', SC_GB)		AS SC_GB_NM,		# 실사 구분 명
+			WH_CD,														# 창고코드
+			F_CD_NM(SECTR_ID, 'WH_CD', WH_CD)		AS WH_NM,			# 창고명
+			REMARKS,													# 비고
+			SC_ST,														# 실사 상태
+			F_CD_NM(SECTR_ID, 'SC_ST', SC_ST)		AS SC_ST_NM,		# 실사 상태 명
+			USE_YN,														# 사용구분
+			'R'				AS ROW_CRUD
+
+		FROM 	T_SC_H
+
+		WHERE	SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+			AND	SC_DY BETWEEN #{SC_DY_FR} AND #{SC_DY_TO}
+			AND	USE_YN = 'Y'
+
+		<if test="WH_CDS != null and WH_CDS.size() != 0">
+			AND WH_CD		IN
+			<foreach collection="WH_CDS" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="WH_CDS == null or WH_CDS.size() == 0">
+			AND 1=0
+		</if>
+
+		ORDER BY
+			SC_NO
+			
+			
+	</select>
+	
+    <!-- 재고실사 상세 목록 조회 -->
+	<select id="selSubList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+
+		SELECT
+			TSH.SECTR_ID,
+			TSL.SC_ID,
+			TSL.SC_SN,
+			TSL.ITM_ID,
+			ITM.ITM_CD,
+			ITM.ITM_NM,
+			TSL.SC_UN,
+			TSL.STOCK_QTY,
+			TSL.SC_QTY,
+			IFNULL(TSL.STOCK_QTY, 0) - IFNULL(TSL.SC_QTY, 0)	AS DIFF_QTY,				#차이수량
+			TSL.SC_PRC,																		#재고실사단가
+			TSL.SC_AM,																		#재고실사금액
+			TSL.SC_STOCK_GB,																#재고실사재고구분
+			F_CD_NM(TSH.SECTR_ID, 'SC_STOCK_GB', TSL.SC_STOCK_GB)		AS SC_STOCK_GB_NM	#재고실사재고구분명
+		FROM  T_SC_L TSL
+		    LEFT JOIN T_SC_H TSH
+		    	ON 	TSH.SC_ID 		= TSL.SC_ID
+			LEFT OUTER JOIN V_ITM	ITM
+				ON	ITM.ITM_ID		= TSL.ITM_ID
+		WHERE 	TSL.SC_ID		= #{SC_ID}
+			AND	TSL.USE_YN		= 'Y'
+		
+		ORDER BY
+			 TSL.SC_SN
+
+	</select>	
+	
+</mapper>

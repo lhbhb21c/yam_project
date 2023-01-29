@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/jdbc  http://www.springframework.org/schema/jdbc/spring-jdbc-4.3.xsd
+		">
+        
+	<!-- 기본 DataSource -->
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy" />
+		<property name="url" value="props#[db.url]" />
+<!--		<property name="url" value="jdbc:log4jdbc:mysql://nb10.zaize.com:3306/yam_mes" />-->
+		<property name="username" value="props#[db.username]" />
+		<property name="password" value="props#[db.password]" />
+		<property name="initialSize" value="0"/>
+<!--		<property name="maxActive" value="10"/>-->
+		<property name="maxIdle" value="10"/>
+		<property name="minIdle" value="10"/>
+<!--		<property name="maxWait" value="60000"/>-->
+		<property name="testOnBorrow" value="false"/> 
+		<property name="testOnReturn" value="false"/> 
+		<property name="testWhileIdle" value="false"/> 
+		<property name="timeBetweenEvictionRunsMillis" value="3600000"/> 
+		<property name="numTestsPerEvictionRun" value="5"/>
+		<property name="minEvictableIdleTimeMillis" value="-1"/>
+		<property name="validationQuery" value="SELECT 1"/> 
+		<property name="validationQueryTimeout" value="3000"/> 
+	</bean>
+	<!-- //기본 DataSource -->
+
+
+	<!-- 리포트 DataSource -->
+	<bean id="reportDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy" />
+		<property name="url" value="props#[db.url]" />
+		<property name="username" value="props#[db.username]" />
+		<property name="password" value="props#[db.password]" />
+		<property name="initialSize" value="0"/>
+<!--		<property name="maxActive" value="5"/>-->
+		<property name="maxIdle" value="5"/>
+		<property name="minIdle" value="5"/>
+<!--		<property name="maxWait" value="10000"/>-->
+		<property name="testOnBorrow" value="false"/> 
+		<property name="testOnReturn" value="false"/> 
+		<property name="testWhileIdle" value="false"/> 
+		<property name="timeBetweenEvictionRunsMillis" value="3600000"/> 
+		<property name="numTestsPerEvictionRun" value="5"/>
+		<property name="minEvictableIdleTimeMillis" value="-1"/>
+		<property name="validationQuery" value="SELECT 1"/> 
+		<property name="validationQueryTimeout" value="3000"/> 
+	</bean>
+	<!-- //리포트 DataSource -->
+
+</beans>

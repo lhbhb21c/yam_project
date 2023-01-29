@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: PARTNR_MNG.xml
+	설명	: 거래처관리 - 거래처등록
+	수정일		 	수정자		수정내용
+	2022.02.27		zno
+-->
+<mapper namespace="we.std.base.PARTNR_MNG">
+
+    <!-- 파트너 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.PARTNR_ID,			# 파트너ID
+		    M.SECTR_ID, 			# 섹터ID
+		    sec.SECTR_NM,			# 섹터명
+			M.PARTNR_CD,			# 파트너코드
+			M.PARTNR_NM,			# 파트너이름
+			M.PARTNR_ABBR_NM,		# 파트너약어이름
+			M.PARTNR_TY,			# 파트너유형
+			F_CD_NM(M.SECTR_ID, 'PARTNR_TY', M.PARTNR_TY) AS PARTNR_TY_NM,
+			M.PARTNR_GB,			# 파트너구분
+			F_CD_NM(M.SECTR_ID, 'PARTNR_GB', M.PARTNR_GB) AS PARTNR_GB_NM,
+			M.CEO,					# 대표자
+			M.BLNO,					# 사업자등록번호
+			M.BIZTY,				# 업종
+			M.BIZGB,				# 업태
+			M.ADDR1,				# 주소1
+			M.ADDR2,				# 주소2
+			M.TEL,					# 전화번호
+			M.FAX,					# 팩스번호
+			M.CP_ID,				# 담당자ID
+			mem.USER_NM	AS CP_NM,	# 담당자명
+			M.USE_YN,				# 사용여부
+			F_CD_NM(M.SECTR_ID, 'USE_YN', M.USE_YN) AS USE_YN_NM,
+			M.DEL_YN,				# 삭제여부
+			F_CD_NM(M.SECTR_ID, 'DEL_YN', M.DEL_YN) AS DEL_YN_NM,
+			M.REG_ID,				# 등록자ID
+			M.REG_DT,				# 등록일시
+			M.UPD_ID,				# 수정자ID
+			M.UPD_DT				# 수정일시
+
+		FROM WZ_PARTNR_H M
+			LEFT OUTER JOIN WZ_CO_SECTR sec
+				ON 	sec.SECTR_ID = M.SECTR_ID
+			LEFT OUTER JOIN WZ_MEM_H mem
+				ON 	mem.MEM_ID = M.CP_ID
+
+		WHERE  	M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+			AND M.DEL_YN	= 'N' 
+
+		<if test="PARTNR_NM != null and PARTNR_NM != '' ">
+			AND M.PARTNR_NM	LIKE CONCAT('%', #{PARTNR_NM}, '%')
+		</if>
+
+		<if test="PARTNR_GB != null and PARTNR_GB != '' ">
+			AND M.PARTNR_GB	= #{PARTNR_GB}
+		</if>
+
+		<if test="USE_YN != null and USE_YN != '' ">
+			AND M.USE_YN	= #{USE_YN}
+		</if>
+		
+		ORDER BY
+			M.REG_DT DESC
+
+	</select>
+
+	
+    <!-- 파트너 정보 조회 -->
+	<select id="selMstInfo" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.PARTNR_ID,			# 파트너ID
+		    M.SECTR_ID, 			# 섹터ID
+		    sec.SECTR_NM,			# 섹터명
+			M.PARTNR_CD,			# 파트너코드
+			M.PARTNR_NM,			# 파트너이름
+			M.PARTNR_ABBR_NM,		# 파트너약어이름
+			M.PARTNR_TY,			# 파트너유형
+			M.PARTNR_GB,			# 파트너구분
+			M.CEO,					# 대표자
+			M.BLNO,					# 사업자등록번호
+			M.BIZTY,				# 업종
+			M.BIZGB,				# 업태
+			M.ADDR1,				# 주소1
+			M.ADDR2,				# 주소2
+			M.TEL,					# 전화번호
+			M.FAX,					# 팩스번호
+			M.USE_YN,				# 사용여부
+			M.DEL_YN,				# 삭제여부
+			M.REG_ID,				# 등록자ID
+			M.REG_DT,				# 등록일시
+			M.UPD_ID,				# 수정자ID
+			M.UPD_DT,				# 수정일시
+			'R'	AS ROW_CRUD
+			
+		FROM WZ_PARTNR_H M
+			LEFT OUTER JOIN WZ_CO_SECTR sec
+				ON 	sec.SECTR_ID = M.SECTR_ID
+				
+		WHERE	M.PARTNR_ID	= #{PARTNR_ID}
+			AND M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+
+	</select>
+
+
+
+	<select id="selSectrComboList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.SECTR_ID AS CODE_CD,
+			M.SECTR_NM AS CODE_NM
+
+		FROM WZ_CO_SECTR M
+
+		WHERE M.USE_YN = 'Y' AND M.DEL_YN = 'N'
+
+	</select>
+
+
+
+	<!-- 파트너 정보 저장 -->
+ 	<select id="save" statementType="CALLABLE" parameterType="java.util.Map">
+ 		{ 
+ 			CALL PROC_WZ_PARTNR_MNG (
+ 				#{CMD, jdbcType=VARCHAR},
+ 				#{XML_TEXT, jdbcType=VARCHAR},
+ 				#{SS_USER_INFO.MEM_ID, jdbcType=VARCHAR},
+ 				#{RS_MESSAGE, mode=OUT, jdbcType=VARCHAR},
+ 				#{ER_MESSAGE, mode=OUT, jdbcType=VARCHAR}
+ 			) 
+ 		}
+ 	</select>
+
+</mapper>

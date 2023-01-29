@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: PARTNR_MNG.xml
+	설명	: 거래처관리 - 거래처등록
+	수정일		 	수정자		수정내용
+	2021.10.18 	정래훈		최초작성
+-->
+<mapper namespace="yam.bs.PARTNR_MNG">
+
+    <!-- 파트너 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			pah.COMPANY_CD,			# 회사코드
+			pah.PARTNR_NO,			# 파트너번호
+			pah.PARTNR_CD,			# 파트너코드
+			pah.PARTNR_NM,			# 파트너이름
+			pah.PARTNR_ABBR_NM,		# 파트너약어이름
+			pah.PARTNR_GB,			# 파트너구분
+			pah.CEO,				# 대표자
+			pah.BLNO,				# 사업자등록번호
+			pah.BIZTY,				# 업종
+			pah.BIZGB,				# 업태
+			pah.ADDR1,				# 주소1
+			pah.ADDR2,				# 주소2
+			pah.TEL,				# 전화번호
+			pah.FAX,				# 팩스번호
+			pah.USE_YN,				# 사용여부
+			pah.REG_ID,				# 등록자ID
+			pah.REG_DTTM,			# 등록일시
+			pah.UPD_ID,				# 수정자ID
+			pah.UPD_DTTM			# 수정일시
+			
+		FROM T_PARTNR_H pah	
+
+		WHERE	pah.COMPANY_CD	= #{SS_USER_INFO.COMPANY_CD, jdbcType=VARCHAR}
+
+		<if test="PARTNR_NM != null and PARTNR_NM != '' ">
+			AND pah.PARTNR_NM	LIKE CONCAT('%', #{PARTNR_NM}, '%')
+		</if>
+
+		<if test="PARTNR_GB != null and PARTNR_GB != '' ">
+			AND pah.PARTNR_GB	= #{PARTNR_GB}
+		</if>
+
+		<if test="USE_YN != null and USE_YN != '' ">
+			AND pah.USE_YN		= #{USE_YN}
+		</if>
+
+	</select>
+
+	
+    <!-- 파트너 정보 조회 -->
+	<select id="selMstInfo" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			pah.COMPANY_CD,			# 회사코드
+			pah.PARTNR_NO,			# 파트너번호
+			pah.PARTNR_CD,			# 파트너코드
+			pah.PARTNR_NM,			# 파트너이름
+			pah.PARTNR_ABBR_NM,		# 파트너약어이름
+			pah.PARTNR_GB,			# 파트너구분
+			pah.CEO,				# 대표자
+			pah.BLNO,				# 사업자등록번호
+			pah.BIZTY,				# 업종
+			pah.BIZGB,				# 업태
+			pah.ADDR1,				# 주소1
+			pah.ADDR2,				# 주소2
+			pah.TEL,				# 전화번호
+			pah.FAX,				# 팩스번호
+			pah.USE_YN,				# 사용여부
+			pah.REG_ID,				# 등록자ID
+			pah.REG_DTTM,			# 등록일시
+			pah.UPD_ID,				# 수정자ID
+			pah.UPD_DTTM,			# 수정일시
+			'R'	AS ROW_CRUD
+			
+		FROM T_PARTNR_H pah	
+
+		WHERE	pah.COMPANY_CD	= #{SS_USER_INFO.COMPANY_CD, jdbcType=VARCHAR}
+			AND pah.PARTNR_NO	= #{PARTNR_NO, jdbcType=VARCHAR}
+
+	</select>
+
+
+	<!-- 파트너 정보 저장 -->
+ 	<select id="save" statementType="CALLABLE" parameterType="java.util.Map">
+ 		{ 
+ 			CALL PROC_PARTNR (
+ 				#{CMD, jdbcType=VARCHAR},
+ 				#{XML_TEXT, jdbcType=VARCHAR},
+ 				#{SS_USER_INFO.USER_ID, jdbcType=VARCHAR},
+ 				#{RS_MESSAGE, mode=OUT, jdbcType=VARCHAR},
+ 				#{ER_MESSAGE, mode=OUT, jdbcType=VARCHAR}
+ 			) 
+ 		}
+ 	</select>
+
+</mapper>

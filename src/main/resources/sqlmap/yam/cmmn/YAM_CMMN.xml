@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	:	YAM_CMMN.xml
+	설명:		얌테이블 MES 공통
+	수정일			수정자		수정내용
+	2021.11.26	염국선		최초작성
+-->
+<mapper namespace="yam.cmmn.YAM_MES">
+
+	<!-- 주문집계 배치 처리 -->
+ 	<select id="PROC_TR_AGGR_BAT" statementType="CALLABLE" parameterType="java.util.Map">
+ 		{ 
+ 			CALL PROC_TR_AGGR_BAT (
+ 				#{SECTR_ID},
+ 				#{TR_AGGR_DY},
+ 				#{TR_AGGR_TM},
+ 				#{WORK_ID},
+ 				#{RS_MESSAGE, mode=OUT, jdbcType=VARCHAR},
+ 				#{ER_MESSAGE, mode=OUT, jdbcType=VARCHAR}
+ 			)
+ 		}
+ 	</select>
+
+</mapper>

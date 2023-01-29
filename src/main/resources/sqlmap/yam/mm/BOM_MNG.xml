@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 						
+	파일명	: BOM_MNG.xml
+	설명	: BOM 등록
+	수정일		 	수정자		수정내용
+	2021.10.23	정래훈		최초작성
+-->
+<mapper namespace="yam.mm.BOM_MNG">
+
+    <!-- BOM 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+
+		SELECT
+			boh.SECTR_ID,			# 회사 코드
+			boh.BOM_ID,				# BOM ID
+			boh.ITM_ID,				# 품목 ID
+			itm.ITM_CD,				# 품목 코드
+			boh.ITM_QTY,			# 품목 수량
+			boh.ITM_UN AS QTY_UN,   # 품목 단위
+			F_CD_NM(boh.SECTR_ID,'QTY_UN',boh.ITM_UN)		AS QTY_UN_NM, # 품목 단위명
+			itm.ITM_NM,				# 품목 이름
+			itm.ITM_GB,				# 품목 구분
+			F_CD_NM(boh.SECTR_ID, 'ITM_GB', itm.ITM_GB)	AS ITM_GB_NM, # 품목 구분명
+			boh.APLY_S_DY,			# 적용 시작 일자
+			boh.APLY_E_DY,			# 적용 종료 일자
+			boh.PROC_CD,			# 공정코드
+			F_CD_NM(boh.SECTR_ID, 'PROC_CD', boh.PROC_CD)	AS PROC_CD_NM, # 공정 코드명
+			boh.USE_YN,				# 사용 여부
+			F_CD_NM(boh.SECTR_ID, 'USE_YN', IFNULL(boh.USE_YN,'Y'))		AS USE_YN_NM, # 사용 여부 코드명
+			'R'				AS ROW_CRUD
+
+		FROM T_BOM_H boh
+			LEFT OUTER JOIN V_ITM itm
+				ON		boh.SECTR_ID	= itm.SECTR_ID
+					AND boh.ITM_ID		= itm.ITM_ID
+
+		WHERE	boh.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+
+		<if test="ITM_ID != null and ITM_ID != '' ">
+			AND boh.ITM_ID	LIKE CONCAT('%', #{ITM_ID}, '%')
+		</if>
+		<if test="ITM_CD != null and ITM_CD != '' ">
+			AND itm.ITM_CD	LIKE CONCAT('%', #{ITM_CD}, '%')
+		</if>
+
+		ORDER BY BOM_ID
+
+
+	</select>
+
+    <!-- BOM 정보 조회 -->
+	<select id="selMstInfo" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+
+			SELECT
+				boh.SECTR_ID,			# 회사 코드
+				boh.BOM_ID,				# BOM ID
+				boh.ITM_ID,				# 품목 ID
+				itm.ITM_CD,				# 품목 이름
+				itm.ITM_NM,				# 품목 이름
+				itm.ITM_GB,				# 품목 구분
+				boh.ITM_UN AS QTY_UN,	# 품목 단위
+				F_CD_NM(boh.SECTR_ID,'QTY_UN',boh.ITM_UN)		AS QTY_UN_NM, # 품목 단위명
+				boh.ITM_QTY,			# 품목 수량
+			    boh.PROC_CD,			# 공정 코드
+				F_CD_NM(boh.SECTR_ID, 'PROC_CD', boh.PROC_CD)	AS PROC_CD_NM, # 공정 코드명
+				boh.APLY_S_DY,			# 적용 시작 일자
+				boh.APLY_E_DY,			# 적용 종료 일자
+				boh.USE_YN, 			# 사용 여부
+				F_CD_NM(boh.SECTR_ID, 'USE_YN', IFNULL(boh.USE_YN,'Y'))		AS USE_YN_NM, # 사용 여부 코드명
+				'R'				AS ROW_CRUD
+
+			FROM T_BOM_H boh
+				LEFT OUTER JOIN V_ITM itm
+					ON		boh.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+						AND boh.ITM_ID		= itm.ITM_ID
+
+			WHERE	boh.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+				AND boh.BOM_ID		= #{BOM_ID}
+
+	</select>
+
+
+    <!-- BOM L 목록 조회 -->
+	<select id="selSubList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+
+		SELECT
+			boh.SECTR_ID,			# 회사 ID
+			bol.BOM_ID,				# BOM ID
+			bol.BOM_LN,				# BOM 라인번호
+			bol.PARENT_BOM_LN,		# PARENT BOM 라인번호
+			bol.BOM_SN,				# BOM 순번
+			bol.BOM_LVL,			# BOM 레벨
+			bol.BOM_LVL_SN,			# BOM 레벨 순번
+			bol.ITM_ID,				# 품목 코드
+			itm.ITM_CD,				# 품목 CD
+			itm.ITM_NM,				# 품목 이름
+			bol.ITM_UN AS QTY_UN,	# 수량 단위
+			F_CD_NM(boh.SECTR_ID,'QTY_UN',bol.ITM_UN)		AS QTY_UN_NM, # 품목 단위명
+			bol.ITM_QTY AS CONSM_QTY,			# 소요 수량
+		    bol.PROC_CD,			# 공정 코드
+			F_CD_NM(boh.SECTR_ID, 'PROC_CD', bol.PROC_CD)	AS PROC_CD_NM, # 공정 코드명
+			bol.USE_YN,				# 사용 여부
+			F_CD_NM(boh.SECTR_ID, 'USE_YN', IFNULL(bol.USE_YN,'Y'))		AS USE_YN_NM, # 사용 여부 코드명
+			'R'				AS ROW_CRUD
+
+		FROM T_BOM_L bol
+		    LEFT JOIN T_BOM_H boh
+		    	ON		boh.BOM_ID 		= bol.BOM_ID
+			LEFT OUTER JOIN V_ITM itm
+				ON		boh.SECTR_ID	= itm.SECTR_ID
+					AND bol.ITM_ID		= itm.ITM_ID
+
+		WHERE	boh.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+			AND bol.BOM_ID		= #{BOM_ID}
+		ORDER BY BOM_SN
+
+	</select>
+
+	<!-- 품목코드 중복 체크  -->
+	<select id="selDupCheckItmCd" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT 	COUNT(1) AS DUP_COUNT
+		FROM 	T_BOM_H
+		WHERE	SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+		  	AND ITM_ID		= #{ITM_ID}
+	</select>
+
+
+	<!-- BOM 관련 처리 -->
+ 	<select id="save" statementType="CALLABLE" parameterType="java.util.Map">
+ 		{
+ 			CALL PROC_BOM (
+ 				#{CMD, jdbcType=VARCHAR},
+ 				#{XML_TEXT, jdbcType=VARCHAR},
+ 				#{SS_USER_INFO.USER_ID, jdbcType=VARCHAR},
+ 				#{RS_MESSAGE, mode=OUT, jdbcType=VARCHAR},
+ 				#{ER_MESSAGE, mode=OUT, jdbcType=VARCHAR}
+ 			)
+ 		}
+ 	</select>
+
+</mapper>

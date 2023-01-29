@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	파일명	: PARTNR_SEL_POP.xml
+	설명	: 파트너 선택 팝업
+	수정일		 	수정자		수정내용
+	2022.03.29 	염국선		최초작성
+-->
+<mapper namespace="we.std.popup.PARTNR_SEL_POP">
+
+	<!-- 마스터 목록 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.PARTNR_ID,
+			M.SECTR_ID,
+			sec.SECTR_NM,
+			M.PARTNR_CD,
+			M.PARTNR_NM,
+			M.PARTNR_TY,
+			F_CD_NM('', 'PARTNR_TY', M.PARTNR_TY) 	AS PARTNR_TY_NM,
+			M.PARTNR_GB,
+			F_CD_NM('', 'PARTNR_GB', M.PARTNR_GB) 	AS PARTNR_GB_NM,
+			M.CEO,					# 대표자
+			M.BLNO,					# 사업자등록번호
+			M.BIZTY,				# 업종
+			M.BIZGB,				# 업태
+			M.CP_ID,				# 담당자ID
+			mem.USER_NM	AS CP_NM	# 담당자명
+
+		FROM WZ_PARTNR_H M
+			LEFT OUTER JOIN WZ_CO_SECTR sec
+				ON		sec.SECTR_ID	= M.SECTR_ID
+			LEFT OUTER JOIN WZ_MEM_H mem
+				ON 	mem.MEM_ID = M.CP_ID
+
+		WHERE M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID}
+
+		<if test="FIX_PARTNR_TY != null">
+			AND M.PARTNR_TY	IN
+			<foreach collection="FIX_PARTNR_TY" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+
+		<if test="FIX_PARTNR_GB != null">
+			AND M.PARTNR_GB	IN
+			<foreach collection="FIX_PARTNR_GB" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		
+		<if test="PARTNR_NM != null and PARTNR_NM != '' ">
+			AND M.PARTNR_NM LIKE CONCAT('%', #{PARTNR_NM}, '%')
+		</if>
+
+	</select>
+
+</mapper>

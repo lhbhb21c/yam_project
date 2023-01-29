@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration status="error">
+	<Properties>
+		<Property name="LOG_FILE_PATH">/home/yam_mes/data/EPS_WAS_SERVER/LOG/</Property>
+		<Property name="LOG_FILE_NAME">YAM-MES.log</Property>
+		<Property name="LOG_FILE_PATTERN">YAM-MES-%d{yyyy-MM-dd}-%i.log</Property>
+		<Property name="LOG_LAYOUT_PATTERN">%d %5p [%c] %m%n</Property>
+	</Properties>
+	
+	<Appenders>
+		<Console name="console">
+			<PatternLayout pattern="${LOG_LAYOUT_PATTERN}" />
+		</Console>
+		<RollingFile name="rollingFileDaily" fileName="${LOG_FILE_PATH}${LOG_FILE_NAME}" filePattern="${LOG_FILE_PATH}${LOG_FILE_PATTERN}">
+			<PatternLayout pattern="${LOG_LAYOUT_PATTERN}" />
+			<Policies>
+				<TimeBasedTriggeringPolicy/>
+				<SizeBasedTriggeringPolicy size="10 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="100" />
+		</RollingFile>
+	</Appenders>
+	
+	<Loggers>
+		<Root level="error">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="rollingFileDaily" />
+		</Root>
+
+		<Logger name="yam" level="debug" additivity="false">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="rollingFileDaily" />
+		</Logger>
+
+		<Logger name="org.springframework" level="debug" additivity="false">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="rollingFileDaily" />
+		</Logger>
+		<Logger name="egovframework" level="debug" additivity="false"></Logger>
+		<Logger name="we.std" level="debug" additivity="false">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="rollingFileDaily" />
+		</Logger>
+		<Logger name="std" level="debug" additivity="false">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="rollingFileDaily" />
+		</Logger>
+		<logger name="jdbc.sqlonly" level="debug"></logger>	
+		<logger name="jdbc.resultset" level="off"></logger>
+		<logger name="jdbc.resultsettable" level="off"></logger>
+		<logger name="jdbc.sqltiming" level="off"></logger>
+		<logger name="jdbc.audit" level="off"></logger>
+		<logger name="jdbc.connection" level="off"></logger>
+		
+	</Loggers>
+	
+</Configuration>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	파일명	: BBS_NOTI_POP.xml
+	설명	: 게시내용 조회 팝업
+	수정일		 	수정자		수정내용
+	2021.12.08 	염국선		최초작성
+-->
+<mapper namespace="we.std.popup.BBS_NOTI_POP">
+
+	<!-- 마스터 정보 조회 -->
+	<select id="selMstInfo" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.NOTI_ID,			#게시ID
+			M.BBS_ID,			#전자게시판ID
+			M.BBS_SN,			#전자게시판순번
+			S.CO_CD,			#회사코드
+			M.SUBJCT,			#제목
+			M.CN,				#내용
+			M.ALL_NOTI_YN,		#전체게시여부
+			M.NOTI_SCOPE_CDS,	#게시범위코드
+			M.NOTI_SCOPE_NM,	#게시범위이믈
+			CASE
+				WHEN M.ALL_NOTI_YN = 'Y' THEN '전체'
+				ELSE M.NOTI_SCOPE_NM
+			END	AS NOTI_SCOPE,	#게시범위
+			M.NOTI_S_DY,		#게시시작일자
+			M.NOTI_E_DY,		#게시종료일자
+			M.NOTI_CP_NM,		#게시담당자명
+			M.NOTI_AT,			#게시첨부
+			DATE_FORMAT(M.REG_DT, '%Y-%m-%d %H:%i')	AS REG_DT		#등록일시
+		
+		FROM WZ_BBS_NOTI M
+			INNER JOIN WZ_BBS_H S
+				ON		S.BBS_ID	= M.BBS_ID
+					AND S.USE_YN		= 'Y'
+					AND S.DEL_YN		= 'N'
+					
+		WHERE	M.NOTI_ID	= #{NOTI_ID}
+			AND (M.ALL_NOTI_YN = 'Y' OR F_MATCH_CODES(M.NOTI_SCOPE_CDS, 
+							CASE 
+								WHEN S.NOTI_SCOPE_GB = 'MEM_TY' THEN #{SS_USER_INFO.MEM_TY}
+								WHEN S.NOTI_SCOPE_GB = 'MEM_GB' THEN #{SS_USER_INFO.MEM_GB} 
+							END) IS NOT NULL)
+			AND M.USE_YN	= 'Y'
+			AND M.DEL_YN	= 'N'
+
+	</select>
+
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: SIO_MM_LIST.xml
+	설명	: 재고수불원장
+	수정일			수정자		수정내용
+	2021.10.26	zno
+-->
+<mapper namespace="yam.wm.SIO_ITM_LIST">
+
+    <!-- 재고수불 목록 -->
+    <select id="selMstList" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT
+            M.SECTR_ID,			# 섹터ID
+            M.SIO_YYYY,			# 재고수불번호
+            M.SIO_MM,			# 재고수불순번
+            M.WH_CD,			# 창고
+            F_CD_NM(M.SECTR_ID, 'WH_CD', M.WH_CD)		AS WH_NM,		#창고명
+            M.ITM_ID,			# 품목ID
+            ITM.ITM_CD,			# 품목코드
+            ITM.ITM_NM,			# 품목명
+            F_CD_NM(M.SECTR_ID, 'ITM_GB', ITM.ITM_GB)	AS ITM_GB_NM,	#제품구분
+            M.SIO_UN,			# 재고수불단위
+            M.BS_QTY,			# 기초수량
+            M.WHIN_QTY,			# 입고수량
+            M.TRD_WHIN_QTY,		# 거래입고수량
+            M.PROD_WHIN_QTY,	# 생산입고수량
+            M.WSF_WHIN_QTY,		# 창고이동입고수량
+            M.SC_WHIN_QTY,		# 재고실사입고수량
+            M.ETC_WHIN_QTY,		# 기타입고수량
+            M.WHOUT_QTY,		# 출고수량
+            M.TRD_WHOUT_QTY,	# 거래출고수량
+            M.PROD_WHOUT_QTY,	# 생산출고수량
+            M.WSF_WHOUT_QTY,	# 창고이동출고수량
+            M.SC_WHOUT_QTY,		# 재고실사출고수량
+            M.ETC_WHOUT_QTY,	# 기타 출고수량
+            M.STOCK_QTY			#현재고수량
+        FROM T_SIO_ITM M
+            INNER JOIN  V_ITM ITM
+                ON		ITM.ITM_ID		= M.ITM_ID
+
+		<if test="ITM_GBS != null and ITM_GBS.size() != 0">
+	                AND ITM.ITM_GB		IN
+			<foreach collection="ITM_GBS" item="item"  open="(" close=")" separator=",">
+						#{item}
+			</foreach>
+		</if>
+		<if test="ITM_GBS == null or ITM_GBS.size() == 0">
+					AND 1=0
+		</if>
+
+        WHERE	M.SECTR_ID	= #{SS_USER_INFO.SECTR_ID, jdbcType=VARCHAR}
+            AND M.SIO_YYYY		= substr(#{SIO_YM}, 1, 4)
+            AND M.SIO_MM		= substr(#{SIO_YM}, 6, 2)
+
+		<if test="WH_CDS != null and WH_CDS.size() != 0">
+            AND M.WH_CD			IN
+			<foreach collection="WH_CDS" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="WH_CDS == null or WH_CDS.size() == 0">
+			AND 1=0
+		</if>
+
+        ORDER BY
+            M.ITM_ID,
+            M.WH_CD
+
+    </select>
+
+
+</mapper>

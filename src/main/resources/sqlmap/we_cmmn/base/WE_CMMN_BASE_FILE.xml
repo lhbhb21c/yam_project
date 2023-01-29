@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	File Name    : WE_CMMN_BASE_FILE.xml
+	Modification Information
+	수정일			수정자		수정내용
+	2021.12.16	염국선		최초작성
+-->
+<mapper namespace="we.cmmn.base.FILE">
+        
+    <!-- 파일바인더 정보 조회 -->
+    <select id="selFileBinderInfo" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT
+			M.FILE_BINDER_ID,	#파일바인더ID
+			M.SECTR_ID,			#섹터 ID
+			M.FILE_BINDER_GB,	#파일바인더구분
+			M.FILE_BINDER_CN,	#파일바인더내용
+			M.OD_GB,			#지시서구분
+			M.OD_REF1,			#지시서참조1
+			M.OD_REF2,			#지시서참조2
+			M.OD_REF3,			#지시서참조3
+			M.CNFM_YN,			#확정여부
+			M.USE_YN,			#사용여부
+			M.DEL_YN,			#삭제여부
+			M.REG_ID,			#등록자ID
+			DATE_FORMAT(M.REG_DT, '%Y-%m-%d %H:%i:%s')	AS REG_DT		#등록일시
+			
+		FROM WZ_FILE_BINDER M
+		
+		WHERE	M.FILE_BINDER_ID	= #{FILE_BINDER_ID}
+
+     </select>
+
+    <!-- 파일바인더번호 채번 -->
+    <select id="genBinderId" parameterType="java.util.Map" resultType="java.lang.String">
+		SELECT
+			CONCAT(#{FILE_BINDER_GB}, '-', LPAD(IFNULL(CAST(SUBSTR(MAX(M.FILE_BINDER_ID), LENGTH(#{FILE_BINDER_GB}) + 2) AS UNSIGNED), 0) + 1, 10, '0'))
+				
+		FROM WZ_FILE_BINDER M
+		
+		WHERE M.FILE_BINDER_ID LIKE CONCAT(#{FILE_BINDER_GB}, '-', '%')
+
+     </select>
+
+    <!-- 파일바인더 등록  -->
+    <insert id="insFileBinder" parameterType="java.util.Map">
+    	INSERT INTO WZ_FILE_BINDER (
+			FILE_BINDER_ID,		#파일바인더ID
+			SECTR_ID,			#섹터 ID
+			FILE_BINDER_GB,		#파일바인더구분
+			FILE_BINDER_CN,		#파일바인더내용
+			OD_GB,				#지시서구분
+			OD_REF1,			#지시서참조1
+			OD_REF2,			#지시서참조2
+			OD_REF3,			#지시서참조3
+			CNFM_YN,			#확정여부
+			USE_YN,				#사용여부
+			DEL_YN,				#삭제여부
+			REG_ID,				#등록자ID
+			REG_DT,				#등록일시
+			UPD_ID,				#수정자ID
+			UPD_DT				#수정일시
+    	) VALUES (
+			#{FILE_BINDER_ID},	#파일바인더ID
+			#{SECTR_ID},		#섹터 ID
+			#{FILE_BINDER_GB},	#파일바인더구분
+			#{FILE_BINDER_CN},	#파일바인더내용
+			#{OD_GB},			#지시서구분
+			#{OD_REF1},			#지시서참조1
+			#{OD_REF3},			#지시서참조2
+			#{OD_REF3},			#지시서참조3
+			CASE
+				WHEN #{CNFM_YN} = 'Y' THEN 'Y'
+				ELSE 'N'
+			END,				#확정여부
+			'Y',				#사용여부
+			'N',				#삭제여부
+			#{REG_ID},			#등록자ID
+			NOW(),				#등록일시
+			#{REG_ID},			#수정자ID
+			NOW()				#수정일시
+    	)
+    </insert>
+
+    <!-- 파일바인더 수정  -->
+    <update id="updFileBinder" parameterType="java.util.Map">
+    	UPDATE WZ_FILE_BINDER
+		SET
+		<if test="FILE_BINDER_CN != null">
+			FILE_BINDER_CN	= #{FILE_BINDER_CN},	#파일바인더내용
+		</if>
+		<if test="OD_GB != null">
+			OD_GB			= #{OD_GB},				#지시서구분
+		</if>
+		<if test="OD_NO1 != null">
+			OD_NO1			= #{OD_REF1},			#지시서참조1
+		</if>
+		<if test="OD_NO2 != null">
+			OD_NO2			= #{OD_REF2},			#지시서참조2
+		</if>
+		<if test="OD_NO3 != null">
+			OD_NO3			= #{OD_REF3},			#지시서참조3
+		</if>
+		<if test="CNFM_YN != null">
+			CNFM_YN			= #{CNFM_YN},			#확정여부
+		</if>
+		<if test="USE_YN != null">
+			USE_YN			= #{USE_YN},			#사용여부
+		</if>
+		<if test="DEL_YN != null">
+			DEL_YN			= #{DEL_YN},			#삭제여부
+		</if>
+			UPD_ID			= #{UPD_ID},			#수정자ID
+			UPD_DT			= NOW()					#수정일시
+    	
+		WHERE	FILE_BINDER_ID	= #{FILE_BINDER_ID}
+    	
+    </update>
+
+
+    <!-- 파일 정보 조회 -->
+    <select id="selFileInfo" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT
+			M.FILE_ID,			#파일ID
+			M.SECTR_ID,			#섹터 ID
+			M.FILE_BINDER_ID,	#파일바인더ID
+			M.FILE_BINDER_SN,	#파일바인더순번
+			M.FILE_NM,			#파일이름
+			M.ORIGNL_FILE_NM,	#원본파일이름
+			M.FILE_PATH,		#파일경로
+			M.FILE_EXT,			#파일확정자
+			M.FILE_SZ,			#파일크기
+			M.FILE_MIME,		#파일마임
+			M.FILE_HASH,		#파일해쉬
+			M.FILE_GB,			#파일구분
+			M.FILE_AUTH,		#파일권한
+			M.FILE_OWNER,		#파일오너
+			M.CNFM_YN,			#확정여부
+			M.USE_YN,			#사용여부
+			M.DEL_YN,			#삭제여부
+			M.REG_ID,			#등록자ID
+			DATE_FORMAT(M.REG_DT, '%Y-%m-%d %H:%i:%s')	AS REG_DT		#등록일시
+			 
+		FROM WZ_FILE_H M
+		
+		WHERE	M.FILE_ID	= #{FILE_ID}
+
+     </select>
+
+    <!-- 바인더별 파일 목록 조회 -->
+    <select id="selFileList" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT
+			M.FILE_ID,			#파일ID
+			M.SECTR_ID,			#섹터 ID
+			M.FILE_BINDER_ID,	#파일바인더ID
+			M.FILE_BINDER_SN,	#파일바인더순번
+			M.FILE_NM,			#파일이름
+			M.ORIGNL_FILE_NM,	#원본파일이름
+			M.FILE_PATH,		#파일경로
+			M.FILE_EXT,			#파일확정자
+			M.FILE_SZ,			#파일크기
+			M.FILE_MIME,		#파일마임
+			M.FILE_HASH,		#파일해쉬
+			M.FILE_GB,			#파일구분
+			M.FILE_AUTH,		#파일권한
+			M.FILE_OWNER,		#파일오너
+			M.CNFM_YN,			#확정여부
+			M.USE_YN,			#사용여부
+			M.DEL_YN,			#삭제여부
+			M.REG_ID,			#등록자ID
+			DATE_FORMAT(M.REG_DT, '%Y-%m-%d %H:%i:%s')	AS REG_DT		#등록일시
+
+		FROM WZ_FILE_H M
+		
+		WHERE	M.FILE_BINDER_ID	= #{FILE_BINDER_ID}
+
+		<if test="CNFM_YN != null and CNFM_YN != ''">
+			AND M.CNFM_YN			= #{CNFM_YN}
+		</if>
+
+		<if test="USE_YN != null and USE_YN != ''">
+			AND M.USE_YN			= #{USE_YN}
+		</if>
+
+		<if test="DEL_YN != null and DEL_YN != ''">
+			AND M.DEL_YN			= #{DEL_YN}
+		</if>
+
+     </select>
+
+    <!-- 파일 등록  -->
+    <insert id="insFile" parameterType="java.util.Map">
+    	INSERT INTO WZ_FILE_H (
+			FILE_ID,			#파일ID
+			SECTR_ID,			#섹터 ID
+			FILE_BINDER_ID,		#파일바인더ID
+			FILE_BINDER_SN,		#파일바인더순번
+			FILE_NM,			#파일이름
+			ORIGNL_FILE_NM,		#원본파일이름
+			FILE_PATH,			#파일경로
+			FILE_EXT,			#파일확정자
+			FILE_SZ,			#파일크기
+			FILE_MIME,			#파일마임
+			FILE_HASH,			#파일해쉬
+			FILE_GB,			#파일구분
+			FILE_AUTH,			#파일권한
+			FILE_OWNER,			#파일오너
+			CNFM_YN,			#확정여부
+			USE_YN,				#사용여부
+			DEL_YN,				#삭제여부
+			REG_ID,				#등록자ID
+			REG_DT,				#등록일시
+			UPD_ID,				#수정자ID
+			UPD_DT				#수정일시
+    	) 
+    	SELECT 
+			#{FILE_ID}			AS FILE_ID,			#파일ID
+			#{SECTR_ID}			AS SECTR_ID,		#섹터 ID
+			#{FILE_BINDER_ID}	AS FILE_BINDER_ID,	#파일바인더ID
+    		IFNULL(MAX(M.FILE_BINDER_SN), 0) + 1	AS FILE_BINDER_SN,		#파일바인더순번
+			#{FILE_NM}			AS FILE_NM,			#파일이름
+			#{ORIGNL_FILE_NM}	AS ORIGNL_FILE_NM,	#원본파일이름
+			#{FILE_PATH}		AS FILE_PATH,		#파일경로
+			#{FILE_EXT}			AS FILE_EXT,		#파일확정자
+			#{FILE_SZ}			AS FILE_SZ,			#파일크기
+			#{FILE_MIME}		AS FILE_MIME,		#파일마임
+			#{FILE_HASH}		AS FILE_HASH,		#파일해쉬
+			#{FILE_GB}			AS FILE_GB,			#파일구분
+			#{FILE_AUTH}		AS FILE_AUTH,		#파일권한
+			#{FILE_OWNER}		AS FILE_OWNER,		#파일오너
+			#{CNFM_YN}			AS CNFM_YN,			#확정여부
+			'Y'					AS USE_YN,			#사용여부
+			'N'					AS DEL_YN,			#삭제여부
+			#{REG_ID}			AS REG_ID,			#등록자ID
+			NOW()				AS REG_DTTM,		#등록일시
+			#{REG_ID}			AS UPD_ID,			#수정자ID
+			NOW()				AS UPD_DTTM			#수정일시
+    	
+    	FROM WZ_FILE_H M
+    	WHERE M.FILE_BINDER_ID = #{FILE_BINDER_ID}
+
+    </insert>
+
+    <!-- 파일 수정  -->
+    <update id="updFile" parameterType="java.util.Map">
+    	UPDATE WZ_FILE_H
+		SET
+		<if test="FILE_HASH != null">
+			FILE_HASH		= #{FILE_HASH},			#파일해쉬
+		</if>
+		<if test="FILE_GB != null">
+			FILE_GB			= #{FILE_GB},			#파일구분
+		</if>
+		<if test="FILE_AUTH != null">
+			FILE_AUTH		= #{FILE_AUTH},			#파일권한1
+		</if>
+		<if test="FILE_OWNER != null">
+			FILE_OWNER		= #{FILE_OWNER},		#파일오너
+		</if>
+		<if test="CNFM_YN != null">
+			CNFM_YN			= #{CNFM_YN},			#확정여부
+		</if>
+		<if test="USE_YN != null">
+			USE_YN			= #{USE_YN},			#사용여부
+		</if>
+		<if test="DEL_YN != null">
+			DEL_YN			= #{DEL_YN},			#삭제여부
+		</if>
+			UPD_ID			= #{UPD_ID},			#수정자ID
+			UPD_DT			= NOW()					#수정일시
+    	
+		WHERE	FILE_ID	= #{FILE_ID}
+    	
+    </update>
+
+</mapper>

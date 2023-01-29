@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	파일명	: TR_AGGR_LIST.xml
+	설명	: 주문집계현황
+	수정일		 	수정자		수정내용
+	2021.11.02 	염국선		최초작성
+-->
+<mapper namespace="yam.sm.TR_AGGR_LIST">
+
+	<!-- 주문집계현황 조회 -->
+	<select id="selMstList" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		SELECT
+			M.SECTR_ID,	#회사코드
+			M.TR_AGGR_DY,	#주문집계일자
+			M.TR_AGGR_TM,	#주문집계차수
+			F_CD_NM(M.SECTR_ID, 'TR_AGGR_TM', M.TR_AGGR_TM)	AS TR_AGGR_TM_NM,	#주문집계차수명
+			M.TR_AGGR_SN,	#주문집계순번
+			itm.ITM_ID,		#품목ID
+			itm.ITM_CD,		#품목코드
+			itm.ITM_NM,		#품목명
+			M.ITM_UN,		#품목단위
+			F_CD_NM(M.SECTR_ID, 'QTY_UN', M.ITM_UN)			AS ITM_UN_NM,		#품목단위명
+			M.TR_UN,		#주문단위
+			F_CD_NM(M.SECTR_ID, 'QTY_UN', M.TR_UN)			AS TR_UN_NM,		#주문단위명
+			M.TR_UN_IQT,	#주문단위입수
+			M.TR_QTY,		#주문수량
+# 			M.STOCK_QTY,	#재고수량
+			M.PWO_QTY,		#작업지시수량
+			M.PWP_QTY		#작업실적수량
+		
+		FROM T_TR_AGGR_L M
+			LEFT OUTER JOIN V_ITM itm
+				ON		itm.SECTR_ID	= M.SECTR_ID
+					AND itm.ITM_ID		= M.ITM_ID
+
+		WHERE	M.SECTR_ID		= #{SS_USER_INFO.SECTR_ID}
+			AND M.TR_AGGR_DY	BETWEEN	#{DY_FR} AND #{DY_TO}
+
+		<if test="TR_AGGR_TMS != null and TR_AGGR_TMS.size() != 0">
+			AND M.TR_AGGR_TM	IN
+			<foreach collection="TR_AGGR_TMS" item="item"  open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="TR_AGGR_TMS == null or TR_AGGR_TMS.size() == 0">
+			AND 1=0
+		</if>
+		
+		ORDER BY
+			M.TR_AGGR_DY DESC,
+			M.ITM_ID,
+			M.TR_AGGR_TM DESC,
+			M.TR_AGGR_SN
+
+	</select>
+
+</mapper>
