@@ -1,0 +1,108 @@
+@charset "utf-8";
+/*
+.bln_mobile .icon {
+	display: block;
+	margin: 0 auto;
+	width: 20px;
+	height: 26px;
+	background: url(/WEBSERVER/sj_b2b/images/blt_ucp/bln_mobile.png) center
+		top no-repeat;
+	background-size: 22px;
+}
+
+.bln_mobile em {
+	color: #fff;
+}
+*/
+
+/* 최상위 스크롤 해제 */
+body, html {
+	/*overflow-y: hidden;*/
+	min-width: 1500px;
+}
+
+/* 상단헤드 여백 조정 */
+.navbar {
+    min-height: 40px;
+}
+.minimalize-styl-2 {
+    padding: 4px 12px 5px 12px;
+    margin: 6px 5px 4px 20px;
+}
+.navbar-top-links li a {
+    padding: 5px 8px 6px;
+    /* min-height: 40px; */
+}
+
+/* 상단 탭 여백 */
+.nav-tabs > li > a {
+    padding: 5px 20px 6px 25px;
+}
+
+/* iframe Div 여백 */
+#page-wrapper {
+    padding: 0;
+    z-index: 2003; /* 기본 styls.css 에서 메뉴블럭에 정의된 z-index 보다 높게 설정 */
+}
+.wrapper-content {
+    padding: 1px 10px 30px 10px;
+}
+
+*:focus{/*1px dotted #000*/}
+#page-wrapper .row{/* margin-left:-10px */}
+#page-wrapper .row .btn-primary{margin-left: 10px;}
+.nav.nav-tabs #li_closeTabAll{margin-top:5px;margin-right: 20px;position: absolute;right: 0;}
+
+.tab-container .btn-group {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.sidebar-collapse {
+overflow-y: auto !important;
+}
+.sidebar-collapse::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.sidebar-collapse::-webkit-scrollbar-button {
+  width: 0px;
+  height: 0px;
+}
+.sidebar-collapse::-webkit-scrollbar-thumb {
+  background: #3b3f59;
+  border: 0px none #ffffff;
+  border-radius: 50px;
+}
+.sidebar-collapse::-webkit-scrollbar-thumb:hover {
+  background: #3b3f59;
+}
+.sidebar-collapse::-webkit-scrollbar-thumb:active {
+  background: #3b3f59;
+}
+.sidebar-collapse::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.1);
+  border: 0px none #ffffff;
+  border-radius: 50px;
+}
+.sidebar-collapse::-webkit-scrollbar-track:hover {
+  background: rgba(0,0,0,0.3);
+}
+.sidebar-collapse::-webkit-scrollbar-track:active {
+  background: rgba(0,0,0,0.3);
+}
+.sidebar-collapse::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.sidebar-collapse.sidebar-ie-fix {
+	scrollbar-arrow-color:#3b3f59;
+	/* scrollbar-3dlight-color:blue; */
+	/* scrollbar-darkshadow-color:green; */
+	scrollbar-face-color: #3b3f59;
+	/* scrollbar-hightlight-color:orange; */
+	/* scrollbar-shadow-color:black !important; */
+	scrollbar-track-color:rgba(0,0,0,0.1);
+	-ms-overflow-style: -ms-autohiding-scrollbar;
+}

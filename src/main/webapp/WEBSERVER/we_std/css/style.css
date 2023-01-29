@@ -1,0 +1,276 @@
+body, html {
+    width: 100%; margin: 0; padding: 0;
+}
+html {
+    margin: 0 auto;
+    font-family: "나눔고딕","돋움", Arial, sans-serif;
+}
+body {font-size: 14px; color: #212121}
+ul, li {
+    margin: 0; padding: 0; list-style-type: none;
+}
+a {
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+    color: #ff6a00;
+}
+fieldset {
+    border: 0;
+}
+
+#wrap {
+    width:100%; margin: 0;
+}
+
+/* header style */
+
+
+/* Login Page - Top style */
+#topframe{
+    position: relative;
+    width: 1400px;
+    margin: 0 auto;
+    margin-top:15px;
+    overflow: hidden;
+}
+    .leftframe {
+        position: absolute;
+        top: 15px; left: 15px;
+        width: 290px; height: 600px;
+        z-index: 1000;    
+    }
+        .loginframe{
+            position: relative;
+            display: block;
+            height: 370px;
+            border: 0px solid red;   
+            overflow: hidden; 
+        }
+
+.login_title {
+    position: absolute; top: 0; left: 50%; margin-left: -100px;
+    width: 210px; height: 30px;
+    background: #116B90;
+    text-align: center;
+    padding: 11px 0;
+    filter: alpha(opacity=80); opacity: 0.8;
+}
+.login_title span {
+    color: #fff; font-size: 1.3em; text-transform: uppercase;
+}
+.loginlayer {
+    display: block;
+    background: #ffffff;
+    margin-top: 27px;
+    overflow: hidden;
+}
+
+.loginlayer .loginform {
+    display: block;
+    margin-top: 39px;
+}
+.blind{
+    position: absolute !important;
+    clip: rect(0 0 0 0) !important;
+    overflow: hidden !important;
+}
+.loginlayer .input_rw {
+    clear: both;
+    background: #E9E9E9; padding: 9px;
+    margin-bottom: 9px;
+}
+    .loginlayer .input_rw .ic_id {
+        display: inline-block; float: left;
+        background: url('/WEBSERVER/sj_b2b/images/login_ic_id.png') no-repeat;
+        width: 25px; height: 25px;
+        background-size: 100%;
+        margin-top: 3px;
+    }
+    .loginlayer .input_rw .ic_pw {
+        display: inline-block; float: left;
+        background: url('/WEBSERVER/sj_b2b/images/login_ic_pw.png') no-repeat;
+        width: 25px; height: 25px;
+        background-size: 100%;
+        margin-top: 3px;
+    }
+    .loginlayer .loginform input[type=text], .loginlayer .loginform input[type=password]{
+        background: #E9E9E9; border: 0;
+        width: 190px;
+        padding: 7px;
+        font-size: 1.2em;
+        margin-left: 5px;
+    }
+    .loginlayer .input_rem {
+        padding: 4px 0 15px 0;
+    }
+    .loginlayer .input_btn {
+        clear: both;
+        background: #E9E9E9;
+        padding: 0px;
+        margin: 0 0 9px 0;
+    }
+        .loginlayer .loginform input[type=button]{
+            background: #116B90; border: 0;
+            width: 100%;
+            padding: 7px;
+            font-size: 1.2em; color: #fff;
+            margin: 0px;
+            cursor: pointer;
+        }
+
+    .loginlayer .loginregister {
+        display: block;
+        background: #E9E9E9;
+        text-align: center;
+        padding:  9px 0;
+        color: #4C4C4C;
+    }
+        .loginlayer .loginregister a {
+            color: #4C4C4C;
+            font-size: .9em;
+        }
+
+    .banner {
+    
+    }
+        .banner a {
+            display: block;
+            padding: 10px 0;
+            margin-bottom: 9px;
+            font-size: 1.5em; color: #000;
+            /*background: #fff; filter: alpha(opacity=70); opacity: 0.5;*/
+            background: url('/WEBSERVER/sj_b2b/images/main/bg.png') left top no-repeat;
+        }
+        .banner a:hover {
+            text-decoration: none;
+            background: #ff6a00;
+        }
+            .banner a span {
+                display: block;                
+                color: #fff;
+                padding-left: 31%; line-height: 1.7em; 
+            }
+            .banner a span.ic_estimate {
+                background: url('/WEBSERVER/sj_b2b/images/main/icon_ban_est.png') no-repeat;background-size: 30px 34px; background-position: 13% 0;
+            }
+            .banner a span.ic_order {
+                background: url('/WEBSERVER/sj_b2b/images/main/icon_ban_odr.png') no-repeat;background-size: 30px 34px; background-position: 13% 0;
+            }
+            .banner a span.ic_catalog {
+                background: url('/WEBSERVER/sj_b2b/images/main/icon_ban_cat.png') no-repeat;background-size: 30px 34px; background-position: 13% 0;
+            }
+
+    .slider { 
+        position: relative;   
+        z-index: 100;
+    }
+        .slider ul, .slider ul li {
+            margin: 0; padding: 0; list-style-type: none;
+        }
+        .slider img {
+            display: block; margin: 0;
+        }
+
+
+/* Login Page - Contents style */
+#contents {
+    position: relative;
+    width: 1400px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+.kakao_talk {
+    display: inline; float: left;
+    width: 500px;
+    margin-top: 21px;
+}
+.notice {
+    display: inline; float: left;
+    width: 900px;
+    margin-top: 21px;
+}
+    .notice h4.title{
+        font-size: 1.4em; color: #116B90;
+        margin: 0; padding: 0px 0 9px 0; margin-left: 25px; margin-bottom: 15px;
+        border-bottom: 3px solid #DDDDDD;
+    }
+    .notice .notice_list{
+        margin-left: 25px;
+        background: #fff; border: 1px solid #DDDDDD;
+        padding: 0 15px;
+    }
+    .notice_table {
+        border-collapse: collapse;
+        border: 0;
+        width: 100%;
+    }
+    .notice_table tr {
+        height: 31px;
+        border-bottom: 1px solid #DDDDDD;
+    }
+    .notice_table td a {
+        color: #494A4B;
+    }
+    .notice_table td a:hover {    
+        color: #ff6a00;
+    }
+
+
+/* footer style */
+#footer {
+    position: relative;
+    width: 100%; 
+    background: #484848;
+    padding: 13px 0 30px 0;
+    margin-top: 21px;
+}
+#footer .copyright {
+    display: block;
+    width: 1400px;
+    text-transform: uppercase;
+    color: #bcbcbc;
+    text-align: center;
+    margin: 0 auto; 
+}
+
+@media (max-width:1400px) {
+    #topframe {
+        width: 1024px; min-width: 1024px;
+    }
+    .loginframe {
+        
+    }
+    .leftframe {
+        font-size: 12px;
+        width: 290px; height: 580px;
+    }
+        .loginframe{
+            height: 290px;
+        }
+    .loginlayer {
+        margin-top: 21px;
+    }
+    .loginlayer .input_rw {
+        padding: 5px;
+    }
+    .loginlayer .input_rem {
+        padding: 2px 0 9px 0;
+    }
+    .banner a {
+        font-size: 1.1em;
+        padding: 11px 0;
+    }
+    #contents {
+        width: 1024px;  min-width: 1024px;
+    }
+    .notice {
+        width: 524px;
+        font-size: 13px;
+    }
+    #footer .copyright {
+        width: 1024px;  min-width: 1024px;
+    } 
+    
+}

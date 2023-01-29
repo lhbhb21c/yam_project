@@ -1,0 +1,27 @@
+multicombo {
+    display:block;
+}
+multicombo .dropdown {
+    width: 100%;
+    border:1px;
+}
+multicombo .dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+}
+multicombo .dropdown-menu {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 2px;
+}
+multicombo .dropdown-menu > li.li-btn {
+    padding: 1px 1px;
+}	
+multicombo .dropdown-menu > li.li-btn a {
+	dispaly:inline-block;
+	margin-left:5px;
+	margin-right:5px;
+}	
+multicombo .dropdown-menu > li.li-item {
+    padding: 3px 5px;
+}	

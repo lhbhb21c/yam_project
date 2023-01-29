@@ -1,0 +1,192 @@
+@import "./fonts.css";
+@import "./common.css";
+@import "./form.css";
+
+.container {
+    width: 100%;
+    min-height: 100vh;
+    padding-bottom: 94px;
+    position: relative;
+    box-sizing: border-box;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.content {
+    width: 100%;
+}
+
+.main {
+    font-size: 0;
+    height: calc(100vh - 94px);
+}
+
+.main>div {
+    display: inline-flex;
+    vertical-align: top;
+}
+
+.main .side_bg {
+    width: 55%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-image: url(../../images/skcd_bg3.jpg);
+}
+
+.main .side_cont {
+    width: 45%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background: url(../../images/yam_logo.png) no-repeat;
+    background-position-x: center;
+    background-position-y: 15%;
+}
+
+.main .side_cont .inner {
+    display: block;
+}
+
+.main .side_cont h1 {
+    font-size: 28px;
+    font-family: 'S-CoreDream-7ExtraBold';
+    text-align: center;
+}
+
+.main .side_cont h1 i {
+    display: block;
+    width: 342px;
+    height: 63px;
+    background-image: url(../../images/login/assets/logo.png);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin: 0 auto;
+    font-size: 0;
+    margin-bottom: 25px;
+}
+
+.main .side_cont .form_login {
+    margin-top: 40px;
+    border: 1px solid #eeeeee;
+    padding: 15px;
+    background-color: #fafafa;
+    box-shadow: 1px 1px 1px #eeeeee;
+}
+
+.main .side_cont .form_login .option {
+    width: 260px;
+    display: flex;
+    margin: 0 auto;
+    justify-content: space-between;
+    margin-top: 5px;
+}
+
+.main .side_cont .form_login .option a {
+    font-size: 12px;
+    line-height: 18px;
+    /* text-decoration: underline; */
+    border-bottom: 1px solid gray;
+}
+
+.main .side_cont .form_login .option a:hover {
+	color: #3B85D1;
+	border-bottom: none;
+	font-weight: bold;
+}
+
+.main .side_cont .form_login .btn_wrap {
+    margin-top: 35px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.main .side_cont .form_login .btn_wrap button,.main .side_cont .form_login .btn_wrap a {
+    display: inline-block;
+    border: none;
+    font-size: 14px;
+    background-color: transparent;
+    height: 36px;
+    line-height: 36px;
+    border-radius: 3px;
+    text-align: center;
+}
+
+.main .side_cont .form_login .btn_wrap > * + * {
+    margin-left: 6px;
+}
+
+.main .side_cont .form_login .btn_wrap .login {
+    width: 100%;
+    background-color: #2185d0;
+    color: #fff;
+    transition: all 150ms linear;
+}
+
+.main .side_cont .form_login .btn_wrap .login:hover {
+	background-color: #BE1D2D;
+	transition: all 100ms linear;
+}
+
+.main .side_cont .form_login .btn_wrap .join {
+    width: 50%;
+    background-color: #e0e1e2;
+    transition: all 150ms linear;
+}
+
+.main .side_cont .form_login .btn_wrap .join:hover {
+    color: white;
+    background-color: #3B85D1;
+    transition: all 100ms linear;
+}
+
+.main .side_cont .sub_menu {
+    margin-top: 45px;
+    font-size: 0;
+    width: 480px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.main .side_cont .sub_menu button {
+    display: inline-block;
+    width: 23%;
+    font-size: 12px;
+    border: none;
+    background-color: transparent;
+    font-family: 'S-CoreDream-3Light';
+}
+
+.main .side_cont .sub_menu button i:hover {
+	transition:all 300ms linear;
+	margin-top: -20px;
+}
+
+.main .side_cont .sub_menu button i {
+    width: 65px;
+    height: 65px;
+    background-size: 65px auto;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: block;
+    margin: 0 auto 12px;
+    transition:all 300ms linear;
+}
+
+.main .side_cont .sub_menu button.manual i{
+    background-image: url(../../images/login/assets/btn-manual.png);
+}
+
+.main .side_cont .sub_menu button.cert i{
+    background-image: url(../../images/login/assets/btn-cert.png);
+}
+
+.main .side_cont .sub_menu button.qna i{
+    background-image: url(../../images/login/assets/btn-qna.png);
+}
+
+.main .side_cont .sub_menu button.help i{
+    background-image: url(../../images/login/assets/btn-join.png);
+}
