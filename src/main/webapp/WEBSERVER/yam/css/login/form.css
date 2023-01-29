@@ -1,0 +1,78 @@
+.form_login {
+    width: 260px;
+    margin: 0 auto;
+}
+
+.form_login .text input,
+.form_login .text select {
+    height: 36px;
+    width: 100%;
+    /* background-color: transparent; */
+    border: 1px solid #e1e1e2;
+    border-radius: 3px;
+    box-sizing: border-box;
+    line-height: 34px;
+    padding: 0 10px;
+    display: block;
+}
+
+.form_login .text select {
+	background-color: white;
+}
+
+.form_login .text i.fa-caret-down {
+	float: right;
+    margin-top: -25px;
+    margin-right: 10px;
+} 
+
+.form_login .text label {
+    font-size: 13px;
+    font-weight: 900;
+    font-family: 'NanumSquare';
+}
+
+.form_login .text label + input,
+.form_login .text label + select
+ {
+    margin-top: 8px;
+}
+
+.form_login > form > div + div {
+    margin-top: 14px;
+}
+
+.form_login .checkbox input {
+    display: none;
+}
+
+.form_login .checkbox input + label {
+    font-size: 12px;
+    line-height: 18px;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.form_login .checkbox input + label i {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    vertical-align: top;
+    border: 1px solid #e1e1e2;
+    border-radius: 3px;
+    box-sizing: border-box;
+    margin-right: 10px;
+}
+
+.form_login .checkbox input + label:hover i {
+    background-color: #2185d0;
+    border-color: #2185d0;
+    opacity: 0.7;
+}
+
+.form_login .checkbox input:checked + label i {
+    background-color: #2185d0;
+    border-color: #2185d0;
+    opacity: 1;
+}
+

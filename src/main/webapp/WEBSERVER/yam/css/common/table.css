@@ -1,0 +1,33 @@
+body {
+    font-family: sans-serif;
+}
+
+table {
+    border-collapse: collapse;
+    width: 50%;
+}
+
+td,
+th {
+    border: 1px solid gray;
+    padding: 3px;
+    color : white
+}
+
+th {
+    margin : 0px auto;
+    padding : 0px auto;
+    background: linear-gradient(#005186, #2aacff);
+}
+
+
+td {
+    color : black
+}
+
+tbody tr:nth-child(2n) {
+    background-color: #f3f3f3;
+}
+tbody tr:nth-child(2n+1) {
+    background-color: #fdfdfd;
+}
